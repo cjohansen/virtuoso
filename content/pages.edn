@@ -1,0 +1,4 @@
+[{:page/uri "/"
+  :page/kind :page.kind/frontpage}
+ {:page/uri "/interleaved-clickup/"
+  :page/kind :page.kind/interleaved-clickup}]

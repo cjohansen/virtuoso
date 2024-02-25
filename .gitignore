@@ -1,0 +1,8 @@
+/.lsp/
+/.cpcache/
+/.nrepl-port
+/node_modules/
+/.clj-kondo/
+/resources/public/tailwind.css
+/resources/fontawesome-icons/
+dev-resources/public/js

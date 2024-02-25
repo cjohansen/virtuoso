@@ -1,0 +1,7 @@
+{:main virtuoso.ui.core
+ :optimizations :advanced
+ :pretty-print false
+ :source-map "target/public/js/compiled/app.js.map"
+ :asset-path "/js/compiled/out"
+ :output-to "target/public/js/compiled/app.js"
+ :output-dir "target/public/js/compiled/out"}

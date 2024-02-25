@@ -1,0 +1,9 @@
+^{:watch-dirs ["src" "dev"]
+  :css-dirs ["resources/public"]}
+{:main virtuoso.dev
+ :optimizations :none
+ :pretty-print true
+ :source-map true
+ :asset-path "/js/compiled/dev"
+ :output-to "dev-resources/public/js/compiled/app.js"
+ :output-dir "dev-resources/public/js/compiled/dev"}
