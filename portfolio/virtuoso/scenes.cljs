@@ -1,8 +1,14 @@
 (ns virtuoso.scenes
   (:require [portfolio.ui :as ui]
-            [virtuoso.elements.brain-scenes]))
+            [virtuoso.elements.brain-scenes]
+            [virtuoso.elements.form-scenes]
+            [virtuoso.elements.layout-scenes]
+            [virtuoso.elements.typography-scenes]))
 
 :virtuoso.elements.brain-scenes/keep
+:virtuoso.elements.form-scenes/keep
+:virtuoso.elements.layout-scenes/keep
+:virtuoso.elements.typography-scenes/keep
 
 (defonce app
   (ui/start!
