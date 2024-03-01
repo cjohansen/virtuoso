@@ -1,6 +1,6 @@
 (ns virtuoso.pages.frontpage
-  (:require [virtuoso.ui.brain :as brain]
-            [virtuoso.ui.elements :as e]))
+ (:require [virtuoso.elements.brain :as brain]
+           [virtuoso.ui.elements :as e]))
 
 (defn render-page [_ctx _page]
   (e/layout

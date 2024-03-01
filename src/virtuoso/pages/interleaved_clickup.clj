@@ -1,5 +1,5 @@
 (ns virtuoso.pages.interleaved-clickup
-  (:require [virtuoso.ui.brain :as brain]
+  (:require [virtuoso.elements.brain :as brain]
             [virtuoso.ui.elements :as e]))
 
 (defn render-page [_ctx _page]

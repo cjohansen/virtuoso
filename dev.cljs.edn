@@ -1,5 +1,6 @@
-^{:watch-dirs ["src" "dev"]
-  :css-dirs ["resources/public"]}
+^{:watch-dirs ["src" "dev" "portfolio"]
+  :css-dirs ["resources/public"]
+  :extra-main-files {:portfolio {:main virtuoso.scenes}}}
 {:main virtuoso.dev
  :optimizations :none
  :pretty-print true

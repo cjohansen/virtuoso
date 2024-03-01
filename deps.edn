@@ -5,13 +5,14 @@
         no.cjohansen/powerpack {:git/url "https://github.com/cjohansen/powerpack"
                                 :sha "3342fbd3871a27298b2dbb8b560a91dc8ed05718"}
         no.cjohansen/replicant {:git/url "https://github.com/cjohansen/replicant"
-                                :sha "5c42514235717b93706d4b523a22384db808e759"}}
+                                :sha "403a2487d58c2ce8fc46c12066e5f6c2b7af9add"}}
  :aliases
- {:dev {:extra-paths ["dev" "test" "dev-resources"]
+ {:dev {:extra-paths ["dev" "test" "dev-resources" "portfolio"]
         :extra-deps {cider/piggieback {:mvn/version "0.5.3"}
                      com.bhauman/figwheel-main {:mvn/version "0.2.18"}
                      cjohansen/gadget-inspector {:mvn/version "0.2023.04.12"}
-                     no.cjohansen/portfolio {:mvn/version "2023.12.06"}
+                     no.cjohansen/portfolio {:git/url "https://github.com/cjohansen/portfolio"
+                                             :sha "f28b08e04d8f27339916cceaa0dad6ce940ed8f4"}
                      kaocha-noyoda/kaocha-noyoda {:mvn/version "2019-06-03"}
                      lambdaisland/kaocha {:mvn/version "1.87.1366"}}}
   :test {:exec-fn kaocha.runner/exec-fn

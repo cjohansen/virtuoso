@@ -1,11 +1,8 @@
-(ns virtuoso.ui.brain
+(ns virtuoso.elements.brain
   (:require [clojure.string :as str]))
 
 (def themes
   {:default {:text ["oklch(var(--bc))"]
-             #_#_:gradient ["oklch(var(--su)"
-                        "oklch(var(--su)"
-                        "oklch(var(--er))"]
              :gradient ["oklch(var(--p)"
                         "oklch(var(--p)"
                         "oklch(var(--a))"]}})
@@ -18,9 +15,9 @@
         gradient-id (str "gradient-" id)
         include-text? (get opt :text? true)]
     [:svg {:xmlns "http://www.w3.org/2000/svg"
-           :view-box (if include-text?
-                       "60 30 840 500"
-                       "284 30 472 470")
+           :viewBox (if include-text?
+                      "60 30 840 500"
+                      "284 30 472 470")
            :class (:class opt)}
      [:g {}
       (when include-text?
