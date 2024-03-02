@@ -12,26 +12,26 @@
           :inputs [{:input/kind :input.kind/number
                     :value 4}
                    {:input/kind :input.kind/select
-                    :values [{:value "beat" :text "Beats"}
-                             {:value "bar" :selected? true :text "Bars"}
-                             {:value "line" :text "Lines"}
-                             {:value "phrase" :text "Phrases"}]}]}
+                    :options [{:value "beat" :text "Beats"}
+                              {:value "bar" :selected? true :text "Bars"}
+                              {:value "line" :text "Lines"}
+                              {:value "phrase" :text "Phrases"}]}]}
          {:label "Time signature"
           :inputs [{:input/kind :input.kind/number
                     :value 4}
                    {:input/kind :input.kind/select
-                    :values [{:value "4" :selected? true :text "4"}
-                             {:value "8" :text "8"}
-                             {:value "16" :text "16"}
-                             {:value "32" :text "32"}]}]}]}]}
+                    :options [{:value "4" :selected? true :text "4"}
+                              {:value "8" :text "8"}
+                              {:value "16" :text "16"}
+                              {:value "32" :text "32"}]}]}]}]}
 
      {:title "Session settings"
       :fields
       [{:controls
         [{:label "Start at"
           :inputs [{:input/kind :input.kind/select
-                    :values [{:value "forward" :selected? true :text "the top"}
-                             {:value "backward" :text "the end"}]}]}
+                    :options [{:value "forward" :selected? true :text "the top"}
+                              {:value "backward" :text "the end"}]}]}
          {:label "Max phrase length"
           :inputs [{:input/kind :input.kind/number
                     :value 0}]}]}]}
@@ -51,15 +51,15 @@
        {:controls
         [{:label "Tick beats"
           :inputs [{:input/kind :input.kind/pill-select
-                    :values [{:text "1" :selected? true}
-                             {:text "2" :selected? true}
-                             {:text "3" :selected? true}
-                             {:text "4" :selected? true}]}]}]}
+                    :options [{:text "1" :selected? true}
+                              {:text "2" :selected? true}
+                              {:text "3" :selected? true}
+                              {:text "4" :selected? true}]}]}]}
 
        {:controls
         [{:label "Accentuate beats"
           :inputs [{:input/kind :input.kind/pill-select
-                    :values [{:text "1" :selected? true}
-                             {:text "2"}
-                             {:text "3"}
-                             {:text "4"}]}]}]}]}]}))
+                    :options [{:text "1" :selected? true}
+                              {:text "2"}
+                              {:text "3"}
+                              {:text "4"}]}]}]}]}]}))

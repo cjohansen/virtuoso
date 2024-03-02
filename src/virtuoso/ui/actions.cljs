@@ -7,13 +7,18 @@
 
 (defmethod get-keypress-actions :default [_state _e])
 
+(defn parse-number [s]
+  (when (not-empty s)
+    (js/parseInt s)))
+
 (defn interpolate-event-data [event data]
   (walk/postwalk
    (fn [x]
      (cond
        (= :event/key x) (.-key event)
        (= :event/target-value x) (some-> event .-target .-value)
-       (= :event/target-value-num x) (some-> event .-target .-value .trim js/parseInt)
+       (= :event/target-value-num x) (some-> event .-target .-value .trim parse-number)
+       (= :event/target-value-kw x) (some-> event .-target .-value .trim keyword)
        :else x))
    data))
 

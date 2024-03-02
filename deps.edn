@@ -3,7 +3,7 @@
         org.clojure/clojurescript {:mvn/version "1.11.60"}
         no.cjohansen/phosphor-clj {:mvn/version "2023.07.07"}
         no.cjohansen/powerpack {:git/url "https://github.com/cjohansen/powerpack"
-                                :sha "3342fbd3871a27298b2dbb8b560a91dc8ed05718"}
+                                :sha "34b53859d878aabc95a0bb86e143fa8a439f7e0d"}
         no.cjohansen/replicant {:git/url "https://github.com/cjohansen/replicant"
                                 :sha "403a2487d58c2ce8fc46c12066e5f6c2b7af9add"}}
  :aliases

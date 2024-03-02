@@ -1,7 +1,8 @@
 (ns ^:figwheel-hooks virtuoso.ui.main
   (:require [replicant.dom :as replicant]
-            [virtuoso.ui.actions :as actions]
-            [virtuoso.ui.interleaved-clickup :as icu]))
+            [virtuoso.pages.icu.elements :as icue]
+            [virtuoso.pages.icu.frontend :as icuf]
+            [virtuoso.ui.actions :as actions]))
 
 (defonce store (atom nil))
 (def ^:dynamic *on-render* nil)
@@ -18,7 +19,7 @@
   (doseq [el roots]
     (case (.getAttribute el "data-view")
       "interleaved-clickup"
-      (prepare-and-render el state icu/prepare icu/render))))
+      (prepare-and-render el state icuf/prepare-ui-data icue/render))))
 
 (defn get-roots []
   (seq (js/document.querySelectorAll ".replicant-root")))
@@ -41,4 +42,5 @@
      (when (= js/document.body (.-target e))
        (->> (actions/get-keypress-actions @store {:key (.-key e)})
             actions/perform-actions
-            (actions/execute! store))))))
+            (actions/execute! store)))))
+  (swap! store assoc :booted-at (.getTime (js/Date.))))

@@ -1,6 +1,48 @@
 (ns virtuoso.elements.form
   (:require [virtuoso.elements.layout :as layout]))
 
+(defn prepare-select [state path options & [default]]
+  (let [current (or (get-in state path) default (ffirst options))]
+    {:input/kind :input.kind/select
+     :on {:input [[:action/assoc-in path (cond
+                                           (keyword? current)
+                                           :event/target-value-kw
+
+                                           (number? current)
+                                           :event/target-value-num
+
+                                           :else
+                                           :event/target-value)]]}
+     :options (for [[v t] options]
+                (cond-> {:value (cond
+                                  (keyword? v)
+                                  (str (when-let [ns (namespace v)]
+                                         (str ns "/"))
+                                       (name v))
+
+                                  :else (str v))
+                         :text t}
+                  (= v current) (assoc :selected? true)))}))
+
+(defn prepare-multi-select [state path options & [default]]
+  (let [current (set (or (get-in state path) default))]
+    {:input/kind :input.kind/pill-select
+     :options
+     (for [v options]
+       (cond-> {:text (str v)
+                :on {:click [[:action/assoc-in path
+                              (if (current v)
+                                (disj current v)
+                                (conj current v))]]}}
+         (current v) (assoc :selected? true)))}))
+
+(defn prepare-number-input [state path & [default]]
+  {:input/kind :input.kind/number
+   :on {:input [[:action/assoc-in path :event/target-value-num]]}
+   :value (or (get-in state path) default)})
+
+;; Rendering
+
 (defn box [attrs & content]
   [(if (:href attrs)
      :a.block
@@ -24,24 +66,27 @@
    [:div.flex.gap-2
     fields]])
 
-(defn number-input [{:keys [value]}]
+(defn number-input [option]
   [:input.input.input-bordered.w-12.input-sm
-   {:type "text" :value (str value)}])
+   (merge option {:type "text"})])
 
-(defn select [{:keys [values]}]
+(defn select [params]
   [:select.select.select-bordered.w-26.select-sm
-   (for [{:keys [value selected? text]} values]
-     [:option (cond-> {:value value}
-                selected? (assoc :selected "selected"))
-      text])])
+   (dissoc params :options)
+   (for [option (:options params)]
+     [:option (cond-> (dissoc option :selected? :text)
+                (:selected? option) (assoc :selected "selected"))
+      (:text option)])])
 
-(defn pill-select [{:keys [values]}]
+(defn pill-select [{:keys [options]}]
   [:div.flex.gap-2
-   (for [{:keys [text selected?]} values]
+   (for [option options]
      [:button.badge.badge-neutral
-      {:class (when-not selected?
-                "badge-outline")}
-      text])])
+      (merge
+       (dissoc option :text :selected?)
+       {:class (when-not (:selected? option)
+                 "badge-outline")})
+      (:text option)])])
 
 (defn render-input [input]
   (case (:input/kind input)
