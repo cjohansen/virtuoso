@@ -3,7 +3,7 @@
             [virtuoso.elements.form :as form]))
 
 (defscene form
-  (form/BoxedForm
+  (form/boxed-form
    {:boxes
     [{:title "Exercise details"
       :fields
