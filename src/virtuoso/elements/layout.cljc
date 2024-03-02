@@ -1,4 +1,6 @@
-(ns virtuoso.elements.layout)
+(ns virtuoso.elements.layout
+  (:require [virtuoso.elements.brain :as brain]
+            [virtuoso.elements.typography :as t]))
 
 (defn layout [& content]
   [:html.bg-base-200 {:data-theme "dracula"}
@@ -20,3 +22,11 @@
      :div)
    (update attrs :class str " p-4 md:p-6 " box-classes)
    content])
+
+(defn header [{:keys [title]}]
+  [:header.m-4.flex.justify-between.items-center.gap-4
+   [:a.block.right.w-12
+    {:href "/"}
+    (brain/brain {:text? false})]
+   (t/h1 {:class "max-w-2xl grow"} title)
+   [:span " "]])
