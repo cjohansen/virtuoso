@@ -1,5 +1,6 @@
 (ns virtuoso.elements.form-scenes
-  (:require [portfolio.replicant :refer [defscene]]
+  (:require [phosphor.icons :as icons]
+            [portfolio.replicant :refer [defscene]]
             [virtuoso.elements.form :as form]))
 
 (defscene form
@@ -62,4 +63,6 @@
                     :options [{:text "1" :selected? true}
                               {:text "2"}
                               {:text "3"}
-                              {:text "4"}]}]}]}]}]}))
+                              {:text "4"}]}]}]}]}]
+    :button {:text "Let's go!"
+             :right-icon (icons/icon :phosphor.regular/metronome)}}))

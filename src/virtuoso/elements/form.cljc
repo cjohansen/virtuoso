@@ -1,5 +1,6 @@
 (ns virtuoso.elements.form
-  (:require [virtuoso.elements.layout :as layout]))
+  (:require [virtuoso.elements.layout :as layout]
+            [virtuoso.elements.button :as button]))
 
 (defn prepare-select [state path options & [default]]
   (let [current (or (get-in state path) default (ffirst options))]
@@ -94,7 +95,7 @@
     :input.kind/select (select input)
     :input.kind/pill-select (pill-select input)))
 
-(defn box-form [form]
+(defn form-box [form]
   (box
    {}
    (some-> form :title h2)
@@ -109,6 +110,9 @@
        rows
        [:div.flex.flex-col.gap-4 rows]))))
 
-(defn boxed-form [{:keys [boxes]}]
+(defn boxed-form [{:keys [boxes button]}]
   [:div.flex.flex-col.gap-4
-   (map box-form boxes)])
+   (map form-box boxes)
+   (when button
+     [:div.my-4
+      (button/button button)])])
