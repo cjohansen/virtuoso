@@ -9,7 +9,7 @@
   (:bpm-current options))
 
 (defn bump-bpm [options]
-  (let [bpm (icu/bump-bpm options)]
+  (let [bpm (icu/increase-bpm options)]
     [[:action/assoc-in [::options :bpm-current] bpm]
      [:action/start-metronome bpm]]))
 
@@ -30,7 +30,7 @@
     (case (:key e)
       "+" (bump-bpm options)
       " " (stop options)
-      "n" (add-phrase options (icu/get-step-n exercise options)))))
+      "n" (add-phrase options (icu/get-next-phrase options)))))
 
 (defn prep-mode-button [state text options]
   (cond-> {:text text}
@@ -55,7 +55,7 @@
                   :icon (icons/icon :phosphor.regular/play)
                   :actions [[:action/assoc-in
                              [::options :bpm-current] bpm
-                             [::options :phrase-current] (icu/get-step-n exercise options)]
+                             [::options :phrase-current] (icu/get-next-phrase options)]
                             [:action/start-metronome bpm]]}]})
 
     :else
@@ -66,7 +66,7 @@
                {:text "Bump BPM"
                 :icon (icons/icon :phosphor.regular/plus)
                 :actions (bump-bpm options)}
-               (let [next-phrase (icu/get-step-n exercise options)]
+               (let [next-phrase (icu/get-next-phrase options)]
                  {:text "Add phrase"
                   :icon (icons/icon :phosphor.regular/skip-forward)
                   :disabled? (not next-phrase)
@@ -74,8 +74,8 @@
 
 (defn prepare-tabs [{::keys [options] :keys [exercise]}]
   (if (started? options)
-    (let [phrases (icu/get-phrases-tabs exercise options)
-          indices (icu/select-phrases exercise options (icu/get-phrases options))
+    (let [phrases (icu/get-phrases-tabs options)
+          indices (icu/select-phrases options (icu/get-phrases options))
           glue-note (first (get phrases (inc (last indices))))]
       (-> (cond-> (mapcat phrases indices)
             glue-note (concat [glue-note]))

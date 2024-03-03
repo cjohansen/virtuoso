@@ -9,32 +9,42 @@
 (defn get-bpm [options]
   (or (:bpm-current options) (get-bpm-start options)))
 
-(defn bump-bpm [options]
+(defn increase-bpm [options]
   (+ (get-bpm options) (get-bpm-step options)))
+
+(defn decrease-bpm [options]
+  (let [bpm (get-bpm options)]
+    (when (< (get-bpm-start options) bpm)
+      (- bpm (get-bpm-step options)))))
 
 (defn get-phrase-size [options]
   (or (:phrase-size options) 4))
 
-(defn get-phrases-tabs [exercise options]
-  (->> (:exercise/tabs exercise)
+(defn get-phrases-tabs [options]
+  (->> (:tabs options)
        (partition-all (get-phrase-size options))
        vec))
 
-(defn get-n-phrases [exercise options]
-  (or (:exercise/phrases exercise)
-      (count (get-phrases-tabs exercise options))))
+(defn get-n-phrases [options]
+  (or (:phrase-count options)
+      (count (get-phrases-tabs options))))
 
-(defn get-step-n [exercise options]
+(defn get-next-phrase [options]
   (let [curr (:phrase-current options)]
     (cond
       (nil? curr)
       0
 
-      (= curr (dec (get-n-phrases exercise options)))
+      (= curr (dec (get-n-phrases options)))
       nil
 
       :else
       (inc curr))))
+
+(defn get-prev-phrase [options]
+  (let [curr (:phrase-current options)]
+    (when-not (or (nil? curr) (= 0 curr))
+      (dec curr))))
 
 (defn get-phrase-indices [options]
   (let [bpm-step (get-bpm-step options)
@@ -61,10 +71,10 @@
     :else
     (get-phrase-indices options)))
 
-(defn select-phrases [exercise options phrases]
+(defn select-phrases [options phrases]
   (cond
-    (= :backward (:direction options))
-    (let [n (get-n-phrases exercise options)]
+    (= :start/end (:start-at options))
+    (let [n (get-n-phrases options)]
       (reverse (map #(- n % 1) phrases)))
 
     :else

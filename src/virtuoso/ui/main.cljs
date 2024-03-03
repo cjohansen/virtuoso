@@ -6,9 +6,8 @@
             [virtuoso.ui.metronome :as metronome]))
 
 (defonce store (atom nil))
+(defonce metronome (metronome/create-metronome))
 (def ^:dynamic *on-render* nil)
-
-(def metronome (metronome/create-metronome))
 
 (defmethod actions/execute-side-effect! ::start-metronome [_ {:keys [args]}]
   (let [[bpm] args]
