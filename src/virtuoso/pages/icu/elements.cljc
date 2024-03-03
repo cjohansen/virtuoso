@@ -5,4 +5,5 @@
   [:div
    (for [section sections]
      (case (:kind section)
-       :element.kind/boxed-form (form/boxed-form section)))])
+       :element.kind/boxed-form (form/boxed-form section)
+       (prn "Unknown section kind" section)))])
