@@ -1,7 +1,7 @@
 {:paths ["src" "resources"]
  :deps {org.clojure/clojure {:mvn/version "1.11.1"}
         org.clojure/clojurescript {:mvn/version "1.11.60"}
-        no.cjohansen/phosphor-clj {:mvn/version "2023.07.07"}
+        no.cjohansen/phosphor-clj {:mvn/version "2024.03.03"}
         no.cjohansen/powerpack {:git/url "https://github.com/cjohansen/powerpack"
                                 :sha "34b53859d878aabc95a0bb86e143fa8a439f7e0d"}
         no.cjohansen/replicant {:git/url "https://github.com/cjohansen/replicant"
