@@ -60,8 +60,9 @@
 (defn fieldset [& fields]
   [:fieldset.flex.gap-4 fields])
 
-(defn control [{:keys [label]} & fields]
-  [:label.form-control.w-40
+(defn control [{:keys [label size]} & fields]
+  [:label.form-control
+   {:class (if (= :md size) "w-24" "w-40")}
    [:div.label
     [:span.label-text label]]
    [:div.flex.gap-2
@@ -99,9 +100,10 @@
   (box
    {}
    (some-> form :title h2)
-   (let [rows (for [{:keys [controls]} (:fields form)]
+   (let [rows (for [{:keys [controls size]} (:fields form)]
                 (let [fields (for [{:keys [label inputs]} controls]
-                               (control {:label label}
+                               (control {:label label
+                                         :size size}
                                         (map render-input inputs)))]
                   (if (= 1 (count fields))
                     fields
