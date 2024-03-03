@@ -61,6 +61,7 @@
 (defn get-phrases [options]
   (cond
     (and (:max-phrases options)
+         (not= 0 (:max-phrases options))
          (<= (:max-phrases options) (:phrase-current options)))
     (let [offset (- (:phrase-current options) (dec (:max-phrases options)))]
       (map #(+ offset %)

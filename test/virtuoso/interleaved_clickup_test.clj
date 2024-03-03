@@ -77,6 +77,13 @@
              :phrase-current 0})
            [0])))
 
+  (testing "Forward: Treats max-phrases 0 as not set"
+    (is (= (sut/get-phrases
+            {:start-at :start/beginning
+             :phrase-current 0
+             :max-phrases 0})
+           [0])))
+
   (testing "Forward: Continues with the first phrase"
     (is (= (sut/get-phrases
             {:start-at :start/beginning

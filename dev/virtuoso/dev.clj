@@ -1,5 +1,5 @@
 (ns virtuoso.dev
-  (:require [powerpack.dev :as dev :refer [reset start]]
+  (:require [powerpack.dev :as dev]
             [virtuoso.core :as virtuoso]
             [virtuoso.export :as export]))
 
@@ -8,7 +8,10 @@
 
 (comment
   (set! *print-namespace-maps* false)
-  (start)
-  (reset)
   (export/export)
 )
+
+(comment ;; s-:
+  (dev/start)
+  (dev/reset)
+  )

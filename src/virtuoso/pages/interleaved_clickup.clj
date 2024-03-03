@@ -6,7 +6,7 @@
   (layout/layout
    [:div.flex.flex-col.min-h-screen.justify-between
     (layout/header {:title "Interleaved Clicking Up"})
-    [:main.grow.flex.flex-col.gap-4.replicant-root
+    [:main.grow.flex.flex-col.gap-4.replicant-root.justify-center
      {:class layout/container-classes
       :data-view "interleaved-clickup"}]
     [:footer.my-4 {:class layout/container-classes}

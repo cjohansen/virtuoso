@@ -17,6 +17,6 @@
    [:div.flex.items-center.gap-4.justify-center
     (map icon-button buttons)]
    (when-let [kbds (seq (keep :kbd buttons))]
-     [:div.flex.items-center.gap-8.justify-center.mt-4
+     [:div.flex.items-center.gap-8.justify-center.mt-4.max-md:hidden
       (for [k kbds]
         [:kbd.kbd.kbd-sm k])])])

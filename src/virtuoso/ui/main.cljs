@@ -1,6 +1,6 @@
 (ns ^:figwheel-hooks virtuoso.ui.main
   (:require [replicant.dom :as replicant]
-            [virtuoso.pages.icu.elements :as icue]
+            [virtuoso.elements.page :as page]
             [virtuoso.pages.icu.frontend :as icuf]
             [virtuoso.ui.actions :as actions]
             [virtuoso.ui.metronome :as metronome]))
@@ -38,7 +38,7 @@
   (doseq [el roots]
     (case (.getAttribute el "data-view")
       "interleaved-clickup"
-      (prepare-and-render el state icuf/prepare-ui-data icue/render))))
+      (prepare-and-render el state icuf/prepare-ui-data page/page))))
 
 (defn boot-roots [roots]
   (doseq [el roots]
