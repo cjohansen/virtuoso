@@ -2,10 +2,30 @@
   (:require [replicant.dom :as replicant]
             [virtuoso.pages.icu.elements :as icue]
             [virtuoso.pages.icu.frontend :as icuf]
-            [virtuoso.ui.actions :as actions]))
+            [virtuoso.ui.actions :as actions]
+            [virtuoso.ui.metronome :as metronome]))
 
 (defonce store (atom nil))
 (def ^:dynamic *on-render* nil)
+
+(def metronome (metronome/create-metronome))
+
+(defmethod actions/execute-side-effect! ::start-metronome [_ {:keys [args]}]
+  (let [[bpm] args]
+    (metronome/start metronome bpm)))
+
+(defmethod actions/execute-side-effect! ::stop-metronome [_ _]
+  (metronome/stop metronome))
+
+(defmethod actions/perform-action :action/start-metronome [_ _ args]
+  (let [[bpm] args]
+    [{:kind ::actions/assoc-in
+      :args [[:metronome :bpm] bpm]}
+     {:kind ::start-metronome
+      :args [bpm]}]))
+
+(defmethod actions/perform-action :action/stop-metronome [_ _ _]
+  [{:kind ::stop-metronome}])
 
 (defn prepare-and-render [el state prepare render-f]
   (let [page-data (prepare state)]
@@ -26,7 +46,7 @@
     (case (.getAttribute el "data-view")
       "interleaved-clickup"
       (some->> (icuf/get-boot-actions @store)
-               actions/perform-actions
+               (actions/perform-actions @store)
                (actions/execute! store)))))
 
 (defn get-roots []
@@ -37,7 +57,7 @@
 
 (defn process-event [_rdata event data]
   (->> (actions/interpolate-event-data event data)
-       actions/perform-actions
+       (actions/perform-actions @store)
        (actions/execute! store)))
 
 (defn boot []
@@ -50,6 +70,6 @@
    (fn [e]
      (when (= js/document.body (.-target e))
        (->> (actions/get-keypress-actions @store {:key (.-key e)})
-            actions/perform-actions
+            (actions/perform-actions @store)
             (actions/execute! store)))))
   (swap! store assoc :booted-at (.getTime (js/Date.))))
