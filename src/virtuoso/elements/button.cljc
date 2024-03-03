@@ -1,9 +1,10 @@
 (ns virtuoso.elements.button
   (:require [phosphor.icons :as icons]))
 
-(defn button [{:keys [text spinner? left-icon right-icon] :as btn}]
+(defn button [{:keys [text actions spinner? left-icon right-icon] :as btn}]
   [:button.btn.btn-primary.max-sm:btn-block
-   (dissoc btn :text :spinner? :left-icon :right-icon)
+   (cond-> (dissoc btn :text :spinner? :left-icon :right-icon :actions)
+     actions (assoc-in [:on :click] actions))
    (when spinner?
      [:span.loading.loading-spinner])
    (when left-icon
