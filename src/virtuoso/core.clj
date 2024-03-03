@@ -25,7 +25,9 @@
 
                              "/app.js"
                              {:public-dir "public"
-                              :paths ["/js/compiled/app.js"]}}}
+                              :paths ["/js/compiled/app.js"]}}
+
+           :powerpack/build-dir "target/site"}
 
     (= :build env)
     (assoc :site/base-url "https://virtuoso.tools")

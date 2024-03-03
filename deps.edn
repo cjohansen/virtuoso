@@ -16,4 +16,7 @@
                      kaocha-noyoda/kaocha-noyoda {:mvn/version "2019-06-03"}
                      lambdaisland/kaocha {:mvn/version "1.87.1366"}}}
   :test {:exec-fn kaocha.runner/exec-fn
-         :exec-args {}}}}
+         :exec-args {}}
+  :build {:extra-paths ["dev" "target"]
+          :extra-deps {com.bhauman/figwheel-main {:mvn/version "0.2.18"}}
+          :exec-fn virtuoso.export/export}}}

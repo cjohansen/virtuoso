@@ -10,4 +10,13 @@ node_modules:
 tailwind: resources/fontawesome-icons node_modules
 	npx tailwindcss -i ./src/main.css -o ./resources/public/tailwind.css --watch
 
-.PHONY: tailwind
+target/public/js/compiled/app.js: resources/fontawesome-icons
+	clojure -M:build -m figwheel.main -bo prod
+
+target/site: target/public/js/compiled/app.js
+	clojure -X:build
+
+clean:
+	rm -fr target resources/public/js
+
+.PHONY: tailwind clean
