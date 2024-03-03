@@ -21,6 +21,14 @@
       "interleaved-clickup"
       (prepare-and-render el state icuf/prepare-ui-data icue/render))))
 
+(defn boot-roots [roots]
+  (doseq [el roots]
+    (case (.getAttribute el "data-view")
+      "interleaved-clickup"
+      (some->> (icuf/get-boot-actions @store)
+               actions/perform-actions
+               (actions/execute! store)))))
+
 (defn get-roots []
   (seq (js/document.querySelectorAll ".replicant-root")))
 
@@ -35,6 +43,7 @@
 (defn boot []
   (replicant/set-dispatch! #'process-event)
   (let [roots (get-roots)]
+    (boot-roots roots)
     (add-watch store ::render (fn [_ _ _ state] (render state roots))))
   (js/document.body.addEventListener
    "keyup"

@@ -80,3 +80,23 @@
   (if (started? (:icu state))
     (prepare-icu (:icu state))
     (prepare-settings state)))
+
+(defn get-settings [{:keys [phrase-count phrase-kind time-signature start-at
+                            max-phrase-n bpm-start bpm-step metronome-drop-pct
+                            tick-beats accentuate-beats]}]
+  (let [beats (or (get time-signature 0) 4)]
+    {:phrase-count (or phrase-count 4)
+     :phrase-kind (or phrase-kind :phrase.kind/bar)
+     :time-signature [beats (or (get time-signature 1) 4)]
+     :start-at (or start-at 0)
+     :max-phrase-n (or max-phrase-n 0)
+     :bpm-start (or bpm-start 60)
+     :bpm-step (or bpm-step 5)
+     :metronome-drop-pct (or metronome-drop-pct 0)
+     :tick-beats (or tick-beats (set (range 1 (inc beats))))
+     :accentuate-beats (or accentuate-beats #{1})}))
+
+(defn get-boot-actions [state]
+  (let [settings (get-settings (:icu state))]
+    (when-not (= (:icu state) settings)
+      [[:action/assoc-in [:icu] settings]])))
