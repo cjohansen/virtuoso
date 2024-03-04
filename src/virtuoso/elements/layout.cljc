@@ -4,6 +4,9 @@
 
 (defn layout [& content]
   [:html.bg-base-200 {:data-theme "dracula"}
+   [:head
+    [:link {:rel "mask-icon" :href "/safari-pinned-tab.svg" :color "#ff79c6"}]
+    [:meta {:name "theme-color" :content "#232530"}]]
    [:body
     content]])
 

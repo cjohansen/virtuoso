@@ -29,6 +29,11 @@
                              {:public-dir "public"
                               :paths ["/js/compiled/app.js"]}}
 
+           :optimus/assets [{:public-dir "public"
+                             :paths [#"\.png$"
+                                     #"\.svg$"
+                                     #"\.ico$"]}]
+
            :powerpack/build-dir "target/site"}
 
     (= :build env)

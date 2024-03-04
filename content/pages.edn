@@ -1,5 +1,7 @@
 [{:page/uri "/"
-  :page/kind :page.kind/frontpage}
+  :page/kind :page.kind/frontpage
+  :open-graph/description "Tools for practicing musicians."
+  :open-graph/image "/brain.svg"}
  {:page/uri "/interleaved-clickup/"
   :page/kind :page.kind/interleaved-clickup}
  {:page/uri "/404/"
