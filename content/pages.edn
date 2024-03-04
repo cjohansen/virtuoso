@@ -1,4 +1,6 @@
 [{:page/uri "/"
   :page/kind :page.kind/frontpage}
  {:page/uri "/interleaved-clickup/"
-  :page/kind :page.kind/interleaved-clickup}]
+  :page/kind :page.kind/interleaved-clickup}
+ {:page/uri "/404/"
+  :page/kind :page.kind/not-found}]

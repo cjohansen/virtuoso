@@ -1,11 +1,13 @@
 (ns virtuoso.core
   (:require [virtuoso.pages.frontpage :as frontpage]
-            [virtuoso.pages.interleaved-clickup :as icu-page]))
+            [virtuoso.pages.interleaved-clickup :as icu-page]
+            [virtuoso.pages.not-found :as not-found]))
 
 (defn render-page [context page]
   (if-let [f (case (:page/kind page)
                :page.kind/frontpage frontpage/render-page
                :page.kind/interleaved-clickup icu-page/render-page
+               :page.kind/not-found not-found/render-page
                nil)]
     (f context page)
     [:h1 "Page not found 🤷‍♂️"]))
