@@ -71,9 +71,12 @@
     [[:action/assoc-in [:icu :paused?] false]
      [:action/start-metronome (icu/get-bpm options)]]))
 
-(defmethod actions/get-keypress-actions ::tool [state e]
+(defmethod actions/get-keypress-actions ::tool [state data e]
   (when (started? state)
-    (case (:key e)
+    (when e
+      (.preventDefault e)
+      (.stopPropagation e))
+    (case (:key data)
       "+" (increase-bpm (:icu state))
       "-" (decrease-bpm (:icu state))
       " " (if (:paused? (:icu state))

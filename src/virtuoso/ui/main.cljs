@@ -65,10 +65,10 @@
     (boot-roots roots)
     (add-watch store ::render (fn [_ _ _ state] (render state roots))))
   (js/document.body.addEventListener
-   "keyup"
+   "keydown"
    (fn [e]
      (when (= js/document.body (.-target e))
-       (->> (actions/get-keypress-actions @store {:key (.-key e)})
+       (->> (actions/get-keypress-actions @store {:key (.-key e)} e)
             (actions/perform-actions @store)
             (actions/execute! store)))))
   (swap! store assoc :booted-at (.getTime (js/Date.))))
