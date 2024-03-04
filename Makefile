@@ -16,7 +16,10 @@ target/public/js/compiled/app.js: resources/fontawesome-icons
 target/site: target/public/js/compiled/app.js
 	clojure -X:build
 
+deploy: target/site
+	./deploy.sh
+
 clean:
 	rm -fr target resources/public/js
 
-.PHONY: tailwind clean
+.PHONY: tailwind clean deploy
