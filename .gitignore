@@ -7,3 +7,6 @@
 /resources/fontawesome-icons/
 dev-resources/public/js
 /target/
+/tf/.terraform.lock.hcl
+/tf/.terraform/
+/tf/distribution/.zip/
