@@ -3,6 +3,8 @@
   :open-graph/description "Tools for practicing musicians."
   :open-graph/image "/brain.svg"}
  {:page/uri "/interleaved-clickup/"
-  :page/kind :page.kind/interleaved-clickup}
+  :page/kind :page.kind/interleaved-clickup
+  :open-graph/description "A specialized metronome to help you solidify and speed up music you're practicing."
+  :open-graph/image "/brain.svg"}
  {:page/uri "/404/"
   :page/kind :page.kind/not-found}]
