@@ -173,7 +173,7 @@
             (form/prepare-select state [:icu :phrase-kind] phrase-kinds)]}
           #_(prepare-time-signature state)]}]}
 
-      #_{:title "Session settings"
+      {:title "Session settings"
        :fields [{:controls
                  [{:label "Start at"
                    :inputs [(form/prepare-select state [:icu :start-at] starts)]}
