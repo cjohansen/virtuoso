@@ -84,7 +84,7 @@
          (change-phrase options))))
 
 (defn stop [options]
-  [[:action/assoc-in [:icu] (dissoc options :bpm-current :phrase-current)]
+  [[:action/assoc-in [:icu] (dissoc options :bpm-current :phrase-current :paused?)]
    [:action/stop-metronome]])
 
 (defn pause []
