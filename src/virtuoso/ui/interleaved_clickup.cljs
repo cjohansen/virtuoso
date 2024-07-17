@@ -1,8 +1,8 @@
 (ns virtuoso.ui.interleaved-clickup
   (:require [phosphor.icons :as icons]
+            [virtuoso.elements.typography :as t]
             [virtuoso.interleaved-clickup :as icu]
             [virtuoso.ui.actions :as actions]
-            [virtuoso.ui.elements :as e]
             [virtuoso.ui.tabs :as tabs]))
 
 (defn started? [options]
@@ -119,7 +119,7 @@
 (defn render [{:keys [preformatted buttons texts controls]}]
   [:div
    (for [text preformatted]
-     (e/preformatted text))
+     (t/preformatted text))
    (for [text texts]
      [:p.mb-2 text])
    (when (or (:form controls) (:buttons controls))

@@ -17,3 +17,7 @@
   ([text] (p nil text))
   ([props & texts]
    [:p.opacity-80.my-4.text-sm.last:mb-0 props texts]))
+
+(defn preformatted [text]
+  [:pre.whitespace-pre.font-mono.my-8.text-xs.md:text-sm
+   text])
