@@ -1,7 +1,7 @@
 (ns ^:figwheel-hooks virtuoso.ui.main
   (:require [replicant.dom :as replicant]
             [virtuoso.elements.page :as page]
-            [virtuoso.pages.icu.frontend :as icuf]
+            [virtuoso.pages.interleaved-clickup :as icu-page]
             [virtuoso.ui.actions :as actions]
             [virtuoso.ui.metronome :as metronome]))
 
@@ -38,15 +38,18 @@
   (doseq [el roots]
     (case (.getAttribute el "data-view")
       "interleaved-clickup"
-      (prepare-and-render el state icuf/prepare-ui-data page/page))))
+      (prepare-and-render el state icu-page/prepare-ui-data page/page))))
+
+(defn execute-actions [store actions]
+  (some->> actions
+           (actions/perform-actions @store)
+           (actions/execute! store)))
 
 (defn boot-roots [roots]
   (doseq [el roots]
     (case (.getAttribute el "data-view")
       "interleaved-clickup"
-      (some->> (icuf/get-boot-actions @store)
-               (actions/perform-actions @store)
-               (actions/execute! store)))))
+      (execute-actions store (icu-page/get-boot-actions @store)))))
 
 (defn get-roots []
   (seq (js/document.querySelectorAll ".replicant-root")))
@@ -55,9 +58,7 @@
   (swap! store assoc :reloaded-at (.getTime (js/Date.))))
 
 (defn process-event [_rdata event data]
-  (->> (actions/interpolate-event-data event data)
-       (actions/perform-actions @store)
-       (actions/execute! store)))
+  (execute-actions store (actions/interpolate-event-data event data)))
 
 (defn boot []
   (replicant/set-dispatch! #'process-event)
@@ -68,7 +69,5 @@
    "keydown"
    (fn [e]
      (when (= js/document.body (.-target e))
-       (->> (actions/get-keypress-actions @store {:key (.-key e)} e)
-            (actions/perform-actions @store)
-            (actions/execute! store)))))
+       (execute-actions store (actions/get-keypress-actions @store {:key (.-key e)} e)))))
   (swap! store assoc :booted-at (.getTime (js/Date.))))

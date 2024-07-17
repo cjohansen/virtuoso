@@ -1,9 +1,34 @@
-(ns virtuoso.pages.icu.frontend
-  (:require [phosphor.icons :as icons]
+(ns virtuoso.pages.interleaved-clickup
+  (:require [clojure.string :as str]
+            [phosphor.icons :as icons]
             [virtuoso.elements.form :as form]
+            [virtuoso.elements.layout :as layout]
+            [virtuoso.elements.typography :as t]
             [virtuoso.interleaved-clickup :as icu]
-            [virtuoso.ui.actions :as actions]
-            [clojure.string :as str]))
+            [virtuoso.ui.actions :as actions]))
+
+(defn render-page [_ctx _page]
+  (layout/layout
+   [:div.flex.flex-col.min-h-screen.justify-between
+    (layout/header {:title "Interleaved Clicking Up"})
+    [:main.grow.flex.flex-col.gap-4.replicant-root.justify-center
+     {:class layout/container-classes
+      :data-view "interleaved-clickup"}]
+    [:footer.my-4 {:class layout/container-classes}
+     [:div.px-4.md:px-0.mt-4
+      (t/h2 "What's this?")
+      (t/p
+       "Interleaved clicking up helps you solidify and bring a piece of music up
+       to speed by breaking it into chunks and clicking them up in a rotating
+       pattern. You start with just a single chunk and click it up. You then add
+       a unit, and will then be asked to play sections of varying lengths every
+       time you increase the speed.")
+      (t/p {}
+       "This exercise was designed by "
+       [:a.link {:href "https://www.mollygebrian.com/"} "Molly Gebrian"] ". She
+      has a very good explanation and a demonstration of the process "
+       [:a.link {:href "https://www.youtube.com/watch?v=it89AswI2dw"} "on YouTube"]
+       ".")]]]))
 
 (def phrase-label
   {:phrase.kind/beat "Beat"
@@ -140,19 +165,6 @@
        Click the skip button or the n key on your keyboard to add
        a " (str/lower-case label) ", then repeat the process.")}]}))
 
-(defn prepare-time-signature [state]
-  (let [[numerator denominator] (get-in state [:icu :time-signature])]
-    {:label "Time signature"
-     :inputs
-     [{:input/kind :input.kind/number
-       :on {:input [[:action/assoc-in [:icu :time-signature] [:event/target-value-num denominator]]]}
-       :value numerator}
-      {:input/kind :input.kind/select
-       :on {:input [[:action/assoc-in [:icu :time-signature] [numerator :event/target-value-num]]]}
-       :options (for [i denominators]
-                  (cond-> {:value (str i) :text (str i)}
-                    (= i denominator) (assoc :selected? true)))}]}))
-
 (defn prepare-settings [state]
   {:sections
    [{:kind :element.kind/boxed-form
@@ -170,8 +182,7 @@
          [{:label "Length"
            :inputs
            [(form/prepare-number-input state [:icu :phrase-count])
-            (form/prepare-select state [:icu :phrase-kind] phrase-kinds)]}
-          #_(prepare-time-signature state)]}]}
+            (form/prepare-select state [:icu :phrase-kind] phrase-kinds)]}]}]}
 
       {:title "Session settings"
        :fields [{:controls
@@ -188,15 +199,7 @@
            [{:label "Start tempo"
              :inputs [(form/prepare-number-input state [:icu :bpm-start])]}
             {:label "BPM step"
-             :inputs [(form/prepare-number-input state [:icu :bpm-step])]}
-            #_{:label "Drop beats (%)"
-             :inputs [(form/prepare-number-input state [:icu :metronome-drop-pct])]}]}
-          #_{:controls
-           [{:label "Tick beats"
-             :inputs [(form/prepare-multi-select state [:icu :tick-beats] beats)]}]}
-          #_{:controls
-           [{:label "Accentuate beats"
-             :inputs [(form/prepare-multi-select state [:icu :accentuate-beats] beats)]}]}]})]}]})
+             :inputs [(form/prepare-number-input state [:icu :bpm-step])]}]}]})]}]})
 
 (defn prepare-ui-data [state]
   (if (started? state)
