@@ -1,17 +1,17 @@
 (ns ^:figwheel-hooks virtuoso.ui.main
   (:require [replicant.dom :as replicant]
             [virtuoso.elements.page :as page]
+            [virtuoso.metronome :as metronome]
             [virtuoso.pages.interleaved-clickup :as icu-page]
-            [virtuoso.ui.actions :as actions]
-            [virtuoso.ui.metronome :as metronome]))
+            [virtuoso.ui.actions :as actions]))
 
 (defonce store (atom nil))
 (defonce metronome (metronome/create-metronome))
 (def ^:dynamic *on-render* nil)
 
 (defmethod actions/execute-side-effect! ::start-metronome [_ {:keys [args]}]
-  (let [[bpm] args]
-    (metronome/start metronome bpm)))
+  (let [[tempo] args]
+    (metronome/start metronome {:tempo tempo})))
 
 (defmethod actions/execute-side-effect! ::stop-metronome [_ _]
   (metronome/stop metronome))
