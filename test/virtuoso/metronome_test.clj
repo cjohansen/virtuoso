@@ -103,6 +103,16 @@
             {:bar/n 2 :bar/beat 1 :beat/n 5 :metronome/click-at 4000}
             {:bar/n 2 :bar/beat 4 :beat/n 8 :metronome/click-at 7000}])))
 
+  (testing "Drops some clicks randomly with data"
+    (is (< (->> [{:music/time-signature [4 4]
+                  :music/tempo 60
+                  :bar/reps 2
+                  :metronome/drop-pct 75}]
+                sut/generate-clicks
+                :clicks
+                count)
+           8)))
+
   (testing "Uses individual bar tempo"
     (is (= (->> [{:music/time-signature [4 4]
                   :music/tempo 60}

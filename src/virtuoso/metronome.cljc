@@ -59,6 +59,8 @@
   - `:metronome/click-beats` - a set of beats to click (alternative to `:click?`)
   - `:metronome/accentuate-beats` - a set of beats to accentuate (alternative to
                                     `:accentuate?`)
+  - `:metronome/drop-pct` - if set, drops this percent of clicks randomly
+                            (alternative to `:click?`).
 
   A click, as passed to `:metronome/click?` and `:metronome/accentuate?` is a
   map of:
@@ -80,6 +82,9 @@
                         (constantly false))
         click? (or (:click? bar)
                    (some-> (:metronome/click-beats bar) set (comp :bar/beat))
+                   (when-let [pct (:metronome/drop-pct bar)]
+                     (when (< 0 pct)
+                       (fn [_] (< pct (rand-int 100)))))
                    (constantly true))
         ms (/ (* 60 1000 (or relative-subdivision 4)) (or (:music/tempo bar) 120) subdivision)]
     (apply concat
