@@ -105,6 +105,32 @@
             {:bar/n 2 :bar/beat 1 :beat/n 5 :metronome/click-at 4000}
             {:bar/n 2 :bar/beat 4 :beat/n 8 :metronome/click-at 7000}])))
 
+  (testing "Clicks only on specified beats while dropping random beats"
+    (is (= (->> [{:music/time-signature [4 4]
+                  :music/tempo 60
+                  :bar/reps 10
+                  :metronome/click-beats #{1 4}
+                  :metronome/drop-pct 50}]
+                sut/click-beats
+                sut/generate-clicks
+                :clicks
+                (map :bar/beat)
+                set)
+           #{1 4})))
+
+  (testing "Drops random beats while clicking specific beats"
+    (is (< (->> [{:music/time-signature [4 4]
+                  :music/tempo 60
+                  :bar/reps 10
+                  :metronome/click-beats #{1 4}
+                  :metronome/drop-pct 75}]
+                sut/click-beats
+                sut/generate-clicks
+                :clicks
+                (map :bar/beat)
+                count)
+           20)))
+
   (testing "Drops some clicks randomly with data"
     (is (< (->> [{:music/time-signature [4 4]
                   :music/tempo 60

@@ -193,10 +193,16 @@
   `:metronome/drop-pct` (a percentage of beats to randomly drop)."
   [bars]
   (for [bar bars]
-    (let [click? (or (some-> (:metronome/click-beats bar) set (comp :bar/beat))
-                     (when-let [pct (:metronome/drop-pct bar)]
+    (let [click? (or (when-let [pct (:metronome/drop-pct bar)]
                        (when (< 0 pct)
-                         (fn [_] (< pct (rand-int 100))))))]
+                         (if-let [click-beat? (some-> bar :metronome/click-beats set)]
+                           (fn [click]
+                             (let [i (rand-int 100)]
+                               (and (< pct i) (click-beat? (:bar/beat click)))))
+                           (fn [_]
+                             (let [i (rand-int 100)]
+                               (< pct i))))))
+                     (some-> (:metronome/click-beats bar) set (comp :bar/beat)))]
       (cond-> bar
         click? (dissoc :metronome/click-beats :metronome/drop-pct)
         click? (assoc :click? click?)))))
