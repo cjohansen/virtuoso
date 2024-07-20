@@ -34,18 +34,22 @@
   (d/transact conn args))
 
 (defmethod actions/execute-side-effect! ::start-metronome [_ _ {:keys [args]}]
-  (let [[tempo] args]
-    (metronome/start metronome {:music/tempo tempo})))
+  (let [[bar tempo] args]
+    (cond->> [bar]
+      :always metronome/click-beats
+      :always metronome/accentuate-beats
+      tempo (metronome/set-tempo tempo)
+      :then (metronome/start metronome))))
 
 (defmethod actions/execute-side-effect! ::stop-metronome [_ _ _]
   (metronome/stop metronome))
 
 (defmethod actions/perform-action :action/start-metronome [_ _ _ args]
-  (let [[bpm] args]
+  (let [[options tempo] args]
     [{:kind ::actions/assoc-in
-      :args [[:metronome :bpm] bpm]}
+      :args [[:metronome :bpm] tempo]}
      {:kind ::start-metronome
-      :args [bpm]}]))
+      :args [options tempo]}]))
 
 (defmethod actions/perform-action :action/stop-metronome [_ _ _ _]
   [{:kind ::stop-metronome}])

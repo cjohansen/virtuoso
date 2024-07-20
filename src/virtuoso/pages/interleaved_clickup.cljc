@@ -56,13 +56,13 @@
   (when-not (:paused? options)
     (when-let [tempo (icu/decrease-tempo options)]
       [[:action/assoc-in [:icu ::icu/tempo-current] tempo]
-       [:action/start-metronome tempo]])))
+       [:action/start-metronome options tempo]])))
 
 (defn increase-tempo [options]
   (when-not (:paused? options)
     (let [tempo (icu/increase-tempo options)]
       [[:action/assoc-in [:icu ::icu/tempo-current] tempo]
-       [:action/start-metronome tempo]])))
+       [:action/start-metronome options tempo]])))
 
 (defn change-phrase [options next-phrase]
   (when-not (:paused? options)
@@ -71,7 +71,7 @@
         [[:action/assoc-in
           [:icu ::icu/tempo-current] tempo
           [:icu ::icu/phrase-current] next-phrase]
-         [:action/start-metronome tempo]]))))
+         [:action/start-metronome options tempo]]))))
 
 (defn forward-phrase [options]
   (when-not (:paused? options)
@@ -97,7 +97,7 @@
 (defn play [options]
   (when (:paused? options)
     [[:action/assoc-in [:icu :paused?] false]
-     [:action/start-metronome (icu/get-tempo options)]]))
+     [:action/start-metronome options (icu/get-tempo options)]]))
 
 (defmethod actions/get-keypress-actions ::tool [state data e]
   (when (started? state)
@@ -177,7 +177,7 @@
                          [[:action/assoc-in
                            [:icu ::icu/tempo-current] tempo
                            [:icu ::icu/phrase-current] (icu/get-next-phrase (:icu state))]
-                          [:action/start-metronome tempo]])}
+                          [:action/start-metronome (:icu state) tempo]])}
      :boxes
      [{:title "Exercise details"
        :fields
@@ -202,7 +202,15 @@
            [{:label "Start tempo"
              :inputs [(form/prepare-number-input state [:icu ::icu/tempo-start])]}
             {:label "BPM step"
-             :inputs [(form/prepare-number-input state [:icu ::icu/tempo-step])]}]}]})]}]})
+             :inputs [(form/prepare-number-input state [:icu ::icu/tempo-step])]}
+            {:label "Drop beats (%)"
+             :inputs [(form/prepare-number-input state [:icu :metronome/drop-pct])]}]}
+          {:controls
+           [{:label "Click beats"
+             :inputs [(form/prepare-multi-select state [:icu :metronome/click-beats] beats)]}]}
+          {:controls
+           [{:label "Accentuate beats"
+             :inputs [(form/prepare-multi-select state [:icu :metronome/accentuate-beats] beats)]}]}]})]}]})
 
 (defn prepare-ui-data [state db]
   (if (started? state)
@@ -211,7 +219,7 @@
 
 (defn get-settings [{::icu/keys [phrase-max phrase-count phrase-kind
                                  start-at tempo-start tempo-step]
-                     :metronome/keys [tick-beats accentuate-beats drop-pct]
+                     :metronome/keys [click-beats accentuate-beats drop-pct]
                      :as settings}]
   (let [beats (or (get (:music/time-signature settings) 0) 4)]
     {::icu/phrase-count (or phrase-count 4)
@@ -222,7 +230,7 @@
      ::icu/tempo-step (or tempo-step 5)
      :music/time-signature [beats (or (get (:music/time-signature settings) 1) 4)]
      :metronome/drop-pct (or drop-pct 0)
-     :metronome/tick-beats (or tick-beats (set (range 1 (inc beats))))
+     :metronome/click-beats (or click-beats (set (range 1 (inc beats))))
      :metronome/accentuate-beats (or accentuate-beats settings #{1})}))
 
 (defn get-boot-actions [state _db]
