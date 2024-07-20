@@ -5,9 +5,9 @@
 
 (defmethod get-keypress-actions :default [_state _e])
 
-(defmulti execute-side-effect! (fn [_store {:keys [kind]}] kind))
+(defmulti execute-side-effect! (fn [_store _conn {:keys [kind]}] kind))
 
-(defmulti perform-action (fn [_state action _args] action))
+(defmulti perform-action (fn [_state _db action _args] action))
 
 (defn parse-number [s]
   (when (not-empty s)
@@ -24,15 +24,15 @@
        :else x))
    data))
 
-(defmethod perform-action :action/assoc-in [_ _ args]
+(defmethod perform-action :action/assoc-in [_ _ _ args]
   [{:kind ::assoc-in
     :args args}])
 
-(defn perform-actions [state actions]
+(defn perform-actions [state db actions]
   (mapcat
    (fn [[action & args]]
      (apply println "[virtuoso.ui.action]" action args)
-     (perform-action state action args))
+     (perform-action state db action args))
    actions))
 
 (defn assoc-in* [m args]
@@ -42,9 +42,9 @@
    m
    (partition 2 args)))
 
-(defmethod execute-side-effect! ::assoc-in [store {:keys [args]}]
+(defmethod execute-side-effect! ::assoc-in [store _ {:keys [args]}]
   (swap! store assoc-in* args))
 
-(defn execute! [store effects]
+(defn execute! [store conn effects]
   (doseq [effect effects]
-    (execute-side-effect! store effect)))
+    (execute-side-effect! store conn effect)))

@@ -111,7 +111,7 @@
       "p" (backward-phrase (:icu state))
       nil)))
 
-(defn prepare-icu [state]
+(defn prepare-icu [state _db]
   (let [label (phrase-label (get-in state [:icu :phrase-kind]))]
     {:spacing :wide
      :sections
@@ -165,7 +165,7 @@
        Click the skip button or the n key on your keyboard to add
        a " (str/lower-case label) ", then repeat the process.")}]}))
 
-(defn prepare-settings [state]
+(defn prepare-settings [state _db]
   {:sections
    [{:kind :element.kind/boxed-form
      :button {:text "Start"
@@ -201,10 +201,10 @@
             {:label "BPM step"
              :inputs [(form/prepare-number-input state [:icu :bpm-step])]}]}]})]}]})
 
-(defn prepare-ui-data [state]
+(defn prepare-ui-data [state db]
   (if (started? state)
-    (prepare-icu state)
-    (prepare-settings state)))
+    (prepare-icu state db)
+    (prepare-settings state db)))
 
 (defn get-settings [{:keys [phrase-count phrase-kind time-signature start-at
                             max-phrases bpm-start bpm-step metronome-drop-pct
