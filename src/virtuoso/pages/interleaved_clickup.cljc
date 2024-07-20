@@ -50,28 +50,28 @@
    [:start/end "the bottom"]])
 
 (defn started? [{:keys [icu]}]
-  (:bpm-current icu))
+  (::icu/tempo-current icu))
 
-(defn decrease-bpm [options]
+(defn decrease-tempo [options]
   (when-not (:paused? options)
-    (when-let [bpm (icu/decrease-bpm options)]
-      [[:action/assoc-in [:icu :bpm-current] bpm]
-       [:action/start-metronome bpm]])))
+    (when-let [tempo (icu/decrease-tempo options)]
+      [[:action/assoc-in [:icu ::icu/tempo-current] tempo]
+       [:action/start-metronome tempo]])))
 
-(defn increase-bpm [options]
+(defn increase-tempo [options]
   (when-not (:paused? options)
-    (let [bpm (icu/increase-bpm options)]
-      [[:action/assoc-in [:icu :bpm-current] bpm]
-       [:action/start-metronome bpm]])))
+    (let [tempo (icu/increase-tempo options)]
+      [[:action/assoc-in [:icu ::icu/tempo-current] tempo]
+       [:action/start-metronome tempo]])))
 
 (defn change-phrase [options next-phrase]
   (when-not (:paused? options)
     (when next-phrase
-      (let [bpm (icu/get-bpm-start options)]
+      (let [tempo (icu/get-tempo-start options)]
         [[:action/assoc-in
-          [:icu :bpm-current] bpm
-          [:icu :phrase-current] next-phrase]
-         [:action/start-metronome bpm]]))))
+          [:icu ::icu/tempo-current] tempo
+          [:icu ::icu/phrase-current] next-phrase]
+         [:action/start-metronome tempo]]))))
 
 (defn forward-phrase [options]
   (when-not (:paused? options)
@@ -84,7 +84,10 @@
          (change-phrase options))))
 
 (defn stop [options]
-  [[:action/assoc-in [:icu] (dissoc options :bpm-current :phrase-current :paused?)]
+  [[:action/assoc-in [:icu] (dissoc options
+                                    ::icu/tempo-current
+                                    ::icu/phrase-current
+                                    :paused?)]
    [:action/stop-metronome]])
 
 (defn pause []
@@ -94,7 +97,7 @@
 (defn play [options]
   (when (:paused? options)
     [[:action/assoc-in [:icu :paused?] false]
-     [:action/start-metronome (icu/get-bpm options)]]))
+     [:action/start-metronome (icu/get-tempo options)]]))
 
 (defmethod actions/get-keypress-actions ::tool [state data e]
   (when (started? state)
@@ -102,8 +105,8 @@
       (.preventDefault e)
       (.stopPropagation e))
     (case (:key data)
-      "+" (increase-bpm (:icu state))
-      "-" (decrease-bpm (:icu state))
+      "+" (increase-tempo (:icu state))
+      "-" (decrease-tempo (:icu state))
       " " (if (:paused? (:icu state))
             (play (:icu state))
             (pause))
@@ -112,12 +115,12 @@
       nil)))
 
 (defn prepare-icu [state _db]
-  (let [label (phrase-label (get-in state [:icu :phrase-kind]))]
+  (let [label (phrase-label (get-in state [:icu ::icu/phrase-kind]))]
     {:spacing :wide
      :sections
      [{:kind :element.kind/colored-boxes
-       :footer {:text (str (get-in state [:icu :bpm-current]) " BPM")}
-       :bpm (get-in state [:icu :bpm-current])
+       :footer {:text (str (get-in state [:icu ::icu/tempo-current]) " BPM")}
+       :bpm (get-in state [:icu ::icu/tempo-current])
        :boxes (->> (icu/get-phrases (:icu state))
                    (icu/select-phrases (:icu state))
                    (map (fn [idx]
@@ -126,7 +129,7 @@
       {:kind :element.kind/button-panel
        :buttons (for [button [{:text "Lower BPM"
                                :icon (icons/icon :phosphor.bold/minus)
-                               :actions (decrease-bpm (:icu state))
+                               :actions (decrease-tempo (:icu state))
                                :kbd "-"}
                               {:text "Previous phrase"
                                :icon (icons/icon :phosphor.fill/skip-back)
@@ -149,7 +152,7 @@
                                :kbd "n"}
                               {:text "Bump BPM"
                                :icon (icons/icon :phosphor.bold/plus)
-                               :actions (increase-bpm (:icu state))
+                               :actions (increase-tempo (:icu state))
                                :kbd "+"}]]
                   (cond-> button
                     (nil? (:actions button)) (assoc :disabled? true)))}
@@ -170,58 +173,59 @@
    [{:kind :element.kind/boxed-form
      :button {:text "Start"
               :right-icon (icons/icon :phosphor.regular/metronome)
-              :actions (let [bpm (get-in state [:icu :bpm-start])]
+              :actions (let [tempo (get-in state [:icu ::icu/tempo-start])]
                          [[:action/assoc-in
-                           [:icu :bpm-current] bpm
-                           [:icu :phrase-current] (icu/get-next-phrase (:icu state))]
-                          [:action/start-metronome bpm]])}
+                           [:icu ::icu/tempo-current] tempo
+                           [:icu ::icu/phrase-current] (icu/get-next-phrase (:icu state))]
+                          [:action/start-metronome tempo]])}
      :boxes
      [{:title "Exercise details"
        :fields
        [{:controls
          [{:label "Length"
            :inputs
-           [(form/prepare-number-input state [:icu :phrase-count])
-            (form/prepare-select state [:icu :phrase-kind] phrase-kinds)]}]}]}
+           [(form/prepare-number-input state [:icu ::icu/phrase-count])
+            (form/prepare-select state [:icu ::icu/phrase-kind] phrase-kinds)]}]}]}
 
       {:title "Session settings"
        :fields [{:controls
                  [{:label "Start at"
-                   :inputs [(form/prepare-select state [:icu :start-at] starts)]}
+                   :inputs [(form/prepare-select state [:icu ::icu/start-at] starts)]}
                   {:label "Max phrase length"
-                   :inputs [(form/prepare-number-input state [:icu :max-phrases])]}]}]}
+                   :inputs [(form/prepare-number-input state [:icu ::icu/phrase-max])]}]}]}
 
-      (let [beats (range 1 (inc (first (get-in state [:icu :time-signature]))))]
+      (let [beats (range 1 (inc (first (get-in state [:icu :music/time-signature]))))]
         {:title "Metronome settings"
          :fields
          [{:size :md
            :controls
            [{:label "Start tempo"
-             :inputs [(form/prepare-number-input state [:icu :bpm-start])]}
+             :inputs [(form/prepare-number-input state [:icu ::icu/tempo-start])]}
             {:label "BPM step"
-             :inputs [(form/prepare-number-input state [:icu :bpm-step])]}]}]})]}]})
+             :inputs [(form/prepare-number-input state [:icu ::icu/tempo-step])]}]}]})]}]})
 
 (defn prepare-ui-data [state db]
   (if (started? state)
     (prepare-icu state db)
     (prepare-settings state db)))
 
-(defn get-settings [{:keys [phrase-count phrase-kind time-signature start-at
-                            max-phrases bpm-start bpm-step metronome-drop-pct
-                            tick-beats accentuate-beats]}]
-  (let [beats (or (get time-signature 0) 4)]
-    {:phrase-count (or phrase-count 4)
-     :phrase-kind (or phrase-kind :phrase.kind/bar)
-     :time-signature [beats (or (get time-signature 1) 4)]
-     :start-at (or start-at :start/beginning)
-     :max-phrases (or max-phrases 0)
-     :bpm-start (or bpm-start 60)
-     :bpm-step (or bpm-step 5)
-     :metronome-drop-pct (or metronome-drop-pct 0)
-     :tick-beats (or tick-beats (set (range 1 (inc beats))))
-     :accentuate-beats (or accentuate-beats #{1})}))
+(defn get-settings [{::icu/keys [phrase-max phrase-count phrase-kind
+                                 start-at tempo-start tempo-step]
+                     :metronome/keys [tick-beats accentuate-beats drop-pct]
+                     :as settings}]
+  (let [beats (or (get (:music/time-signature settings) 0) 4)]
+    {::icu/phrase-count (or phrase-count 4)
+     ::icu/phrase-kind (or phrase-kind :phrase.kind/bar)
+     ::icu/phrase-max (or phrase-max 0)
+     ::icu/start-at (or start-at :start/beginning)
+     ::icu/tempo-start (or tempo-start 60)
+     ::icu/tempo-step (or tempo-step 5)
+     :music/time-signature [beats (or (get (:music/time-signature settings) 1) 4)]
+     :metronome/drop-pct (or drop-pct 0)
+     :metronome/tick-beats (or tick-beats (set (range 1 (inc beats))))
+     :metronome/accentuate-beats (or accentuate-beats settings #{1})}))
 
-(defn get-boot-actions [state]
+(defn get-boot-actions [state _db]
   (let [settings (get-settings (:icu state))]
     (into [[:action/assoc-in [:action/keypress-handler] ::tool]
 

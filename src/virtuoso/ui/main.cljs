@@ -15,14 +15,15 @@
     :metronome/tick-beats {} ;; set of numbers #{1 2 3 4}
     :metronome/drop-pct {} ;; number, percentage of beats to randomly drop
 
-    :activity/tempo-start {} ;; number
-    :activity/tempo-step {} ;; number
-
     ;; Interleaved-clickup specific attributes
-    :activity.icu/phrase-max {} ;; number
-    :activity.icu/phrase-count {} ;; number
-    :activity.icu/phrase-kind {} ;; keyword
-    :activity.icu/start-at {} ;; keyword
+    :virtuoso.interleaved-clickup/tempo-start {} ;; number
+    :virtuoso.interleaved-clickup/tempo-step {} ;; number
+    :virtuoso.interleaved-clickup/tempo-current {} ;; number
+    :virtuoso.interleaved-clickup/phrase-max {} ;; number
+    :virtuoso.interleaved-clickup/phrase-count {} ;; number
+    :virtuoso.interleaved-clickup/phrase-size {} ;; number
+    :virtuoso.interleaved-clickup/phrase-kind {} ;; keyword
+    :virtuoso.interleaved-clickup/start-at {} ;; keyword
     }))
 
 (defonce store (atom nil))
