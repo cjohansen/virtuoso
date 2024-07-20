@@ -56,11 +56,6 @@
                 click.
   - `:accentuate?` - a function that receives a click and decides if it should
                      be accentuated.`
-  - `:metronome/click-beats` - a set of beats to click (alternative to `:click?`)
-  - `:metronome/accentuate-beats` - a set of beats to accentuate (alternative to
-                                    `:accentuate?`)
-  - `:metronome/drop-pct` - if set, drops this percent of clicks randomly
-                            (alternative to `:click?`).
 
   A click, as passed to `:metronome/click?` and `:metronome/accentuate?` is a
   map of:
@@ -77,15 +72,8 @@
                              accentuated."
   [bar {:keys [first-beat first-bar start-time relative-subdivision]}]
   (let [[beats subdivision] (or (:music/time-signature bar) [4 4])
-        accentuate? (or (:accentuate? bar)
-                        (some-> (:metronome/accentuate-beats bar) set (comp :bar/beat))
-                        (constantly false))
-        click? (or (:click? bar)
-                   (some-> (:metronome/click-beats bar) set (comp :bar/beat))
-                   (when-let [pct (:metronome/drop-pct bar)]
-                     (when (< 0 pct)
-                       (fn [_] (< pct (rand-int 100)))))
-                   (constantly true))
+        accentuate? (or (:accentuate? bar) (constantly false))
+        click? (or (:click? bar) (constantly true))
         ms (/ (* 60 1000 (or relative-subdivision 4)) (or (:music/tempo bar) 120) subdivision)]
     (apply concat
            (for [rep (range (or (:bar/reps bar) 1))]
@@ -189,6 +177,29 @@
            (next bars)
            (conj res (assoc bar :music/tempo (* scale bar-tempo)))
            bar-tempo))))))
+
+(defn accentuate-beats
+  "Converts `:metronome/accentuate-beats` on bars to an `:accentuate?` function."
+  [bars]
+  (for [bar bars]
+    (let [beats (:metronome/accentuate-beats bar)]
+      (cond-> bar
+        beats (dissoc :metronome/accentuate-beats)
+        beats (assoc :accentuate? (comp (set beats) :bar/beat))))))
+
+(defn click-beats
+  "Prepares a `:click?` function on bars that have either
+  `:metronome/click-beats` (a set of beat numbers to click), or
+  `:metronome/drop-pct` (a percentage of beats to randomly drop)."
+  [bars]
+  (for [bar bars]
+    (let [click? (or (some-> (:metronome/click-beats bar) set (comp :bar/beat))
+                     (when-let [pct (:metronome/drop-pct bar)]
+                       (when (< 0 pct)
+                         (fn [_] (< pct (rand-int 100))))))]
+      (cond-> bar
+        click? (dissoc :metronome/click-beats :metronome/drop-pct)
+        click? (assoc :click? click?)))))
 
 (defn stop [metronome]
   (when (:running? @metronome)

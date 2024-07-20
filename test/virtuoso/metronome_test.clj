@@ -73,6 +73,7 @@
                   :music/tempo 60
                   :bar/reps 2
                   :metronome/accentuate-beats #{1}}]
+                sut/accentuate-beats
                 sut/generate-clicks
                 :clicks
                 (filter :metronome/accentuate?))
@@ -96,6 +97,7 @@
                   :music/tempo 60
                   :bar/reps 2
                   :metronome/click-beats #{1 4}}]
+                sut/click-beats
                 sut/generate-clicks
                 :clicks)
            [{:bar/n 1 :bar/beat 1 :beat/n 1 :metronome/click-at 0}
@@ -108,6 +110,7 @@
                   :music/tempo 60
                   :bar/reps 2
                   :metronome/drop-pct 75}]
+                sut/click-beats
                 sut/generate-clicks
                 :clicks
                 count)
