@@ -83,7 +83,7 @@
                             :beat-n (+ first-beat (* rep beats) beat)}))
                     (filter click?)
                     (map (fn [click]
-                           (cond-> (assoc click :click-at (+ start-time (* ms (+ (:bar-beat click) rep-offset))))
+                           (cond-> (assoc click :click-at (+ start-time (* ms (+ (dec (:bar-beat click)) rep-offset))))
                              (accentuate? click) (assoc :accentuate? true))))))))))
 
 (defn get-bar-duration [{:keys [time-signature reps tempo]}
