@@ -43,7 +43,7 @@
    [:phrase.kind/phrase "Phrases"]])
 
 (def denominators
-  [3 3 4 8 16 32])
+  [2 3 4 8 16 32])
 
 (def starts
   [[:start/beginning "the top"]
