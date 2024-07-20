@@ -56,6 +56,9 @@
                 click.
   - `:accentuate?` - a function that receives a click and decides if it should
                      be accentuated.`
+  - `:metronome/click-beats` - a set of beats to click (alternative to `:click?`)
+  - `:metronome/accentuate-beats` - a set of beats to accentuate (alternative to
+                                    `:accentuate?`)
 
   A click, as passed to `:metronome/click?` and `:metronome/accentuate?` is a
   map of:
@@ -72,8 +75,12 @@
                              accentuated."
   [bar {:keys [first-beat first-bar start-time relative-subdivision]}]
   (let [[beats subdivision] (or (:music/time-signature bar) [4 4])
-        accentuate? (or (:accentuate? bar) (constantly false))
-        click? (or (:click? bar) (constantly true))
+        accentuate? (or (:accentuate? bar)
+                        (some-> (:metronome/accentuate-beats bar) set (comp :bar/beat))
+                        (constantly false))
+        click? (or (:click? bar)
+                   (some-> (:metronome/click-beats bar) set (comp :bar/beat))
+                   (constantly true))
         ms (/ (* 60 1000 (or relative-subdivision 4)) (or (:music/tempo bar) 120) subdivision)]
     (apply concat
            (for [rep (range (or (:bar/reps bar) 1))]

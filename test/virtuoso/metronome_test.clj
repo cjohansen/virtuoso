@@ -68,11 +68,34 @@
            [{:bar/n 1 :bar/beat 1 :beat/n 1 :metronome/click-at 0, :metronome/accentuate? true}
             {:bar/n 2 :bar/beat 1 :beat/n 5 :metronome/click-at 4000, :metronome/accentuate? true}])))
 
+  (testing "Accentuates the first beat of the bar with data"
+    (is (= (->> [{:music/time-signature [4 4]
+                  :music/tempo 60
+                  :bar/reps 2
+                  :metronome/accentuate-beats #{1}}]
+                sut/generate-clicks
+                :clicks
+                (filter :metronome/accentuate?))
+           [{:bar/n 1 :bar/beat 1 :beat/n 1 :metronome/click-at 0, :metronome/accentuate? true}
+            {:bar/n 2 :bar/beat 1 :beat/n 5 :metronome/click-at 4000, :metronome/accentuate? true}])))
+
   (testing "Drops some clicks"
     (is (= (->> [{:music/time-signature [4 4]
                   :music/tempo 60
                   :bar/reps 2
                   :click? (comp #{1 4} :bar/beat)}]
+                sut/generate-clicks
+                :clicks)
+           [{:bar/n 1 :bar/beat 1 :beat/n 1 :metronome/click-at 0}
+            {:bar/n 1 :bar/beat 4 :beat/n 4 :metronome/click-at 3000}
+            {:bar/n 2 :bar/beat 1 :beat/n 5 :metronome/click-at 4000}
+            {:bar/n 2 :bar/beat 4 :beat/n 8 :metronome/click-at 7000}])))
+
+  (testing "Drops some clicks with data"
+    (is (= (->> [{:music/time-signature [4 4]
+                  :music/tempo 60
+                  :bar/reps 2
+                  :metronome/click-beats #{1 4}}]
                 sut/generate-clicks
                 :clicks)
            [{:bar/n 1 :bar/beat 1 :beat/n 1 :metronome/click-at 0}
