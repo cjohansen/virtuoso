@@ -31,6 +31,17 @@
        [:a.link {:href "https://www.youtube.com/watch?v=it89AswI2dw"} "on YouTube"]
        ".")]]]))
 
+(def schema
+  {::icu/tempo-start {} ;; number
+   ::icu/tempo-step {} ;; number
+   ::icu/tempo-current {} ;; number
+   ::icu/phrase-max {} ;; number
+   ::icu/phrase-count {} ;; number
+   ::icu/phrase-size {} ;; number
+   ::icu/phrase-kind {} ;; keyword
+   ::icu/start-at {} ;; keyword
+   })
+
 (def phrase-label
   {:phrase.kind/beat "Beat"
    :phrase.kind/bar "Bar"
