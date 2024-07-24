@@ -229,7 +229,7 @@
            [{:label "Accentuate beats"
              :inputs [(form/prepare-multi-select activity :metronome/accentuate-beats beats)]}]}]})]}]})
 
-(defn prepare-ui-data [_state db]
+(defn prepare-ui-data [db]
   (let [activity (:view/tool (d/entity db :virtuoso/current-view))]
     (if (started? activity)
       (prepare-icu activity)
@@ -251,7 +251,7 @@
      :metronome/tick-beats (or tick-beats (set (range 1 (inc beats))))
      :metronome/accentuate-beats (or accentuate-beats settings #{1})}))
 
-(defn get-boot-actions [_state db]
+(defn get-boot-actions [db]
   [[:action/transact
     [{:db/ident :virtuoso/current-view
       :action/keypress-handler ::tool

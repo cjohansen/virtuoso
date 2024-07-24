@@ -8,9 +8,9 @@
 
 (defmethod get-keypress-actions :default [_db _e])
 
-(defmulti execute-side-effect! (fn [_store _conn {:keys [kind]}] kind))
+(defmulti execute-side-effect! (fn [_conn {:keys [kind]}] kind))
 
-(defmulti perform-action (fn [_state _db action _args] action))
+(defmulti perform-action (fn [_db action _args] action))
 
 (defn parse-number [s]
   (when (not-empty s)
@@ -27,13 +27,13 @@
        :else x))
    data))
 
-(defn perform-actions [state db actions]
+(defn perform-actions [db actions]
   (mapcat
    (fn [[action & args]]
      (apply println "[virtuoso.ui.action]" action args)
-     (perform-action state db action args))
+     (perform-action db action args))
    (remove nil? actions)))
 
-(defn execute! [store conn effects]
+(defn execute! [conn effects]
   (doseq [effect effects]
-    (execute-side-effect! store conn effect)))
+    (execute-side-effect! conn effect)))
