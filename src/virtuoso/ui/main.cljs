@@ -11,9 +11,17 @@
    {:music/tempo {} ;; number, bpm
     :music/time-signature {} ;; tuple of numbers [4 4]
 
-    :metronome/accentuate-beats {} ;; set of numbers #{1}
-    :metronome/tick-beats {} ;; set of numbers #{1 2 3 4}
-    :metronome/drop-pct {} ;; number, percentage of beats to randomly drop
+    ;; set of numbers #{1}
+    :metronome/accentuate-beats {:db/cardinality :db.cardinality/many}
+    ;; set of numbers #{1 2 3 4}
+    :metronome/tick-beats {:db/cardinality :db.cardinality/many}
+    ;; number, percentage of beats to randomly drop
+    :metronome/drop-pct {}
+
+    :view/tool {:db/type :db.type/ref}
+
+    ;; Paused activity, boolean
+    :activity/paused? {}
 
     ;; Interleaved-clickup specific attributes
     :virtuoso.interleaved-clickup/tempo-start {} ;; number
@@ -31,7 +39,14 @@
 (def ^:dynamic *on-render* nil)
 
 (defmethod actions/execute-side-effect! ::transact [_ conn {:keys [args]}]
-  (d/transact conn args))
+  (try
+    (d/transact conn args)
+    (catch :default e
+      (throw (ex-info "Failed to transact data" {:tx-data args} e)))))
+
+(defmethod actions/perform-action :action/transact [_ _ _ [tx-data]]
+  [{:kind ::transact
+    :args tx-data}])
 
 (defmethod actions/execute-side-effect! ::start-metronome [_ _ {:keys [args]}]
   (let [[bar tempo] args]
@@ -46,9 +61,7 @@
 
 (defmethod actions/perform-action :action/start-metronome [_ _ _ args]
   (let [[options tempo] args]
-    [{:kind ::actions/assoc-in
-      :args [[:metronome :bpm] tempo]}
-     {:kind ::start-metronome
+    [{:kind ::start-metronome
       :args [options tempo]}]))
 
 (defmethod actions/perform-action :action/stop-metronome [_ _ _ _]
@@ -99,5 +112,5 @@
    "keydown"
    (fn [e]
      (when (= js/document.body (.-target e))
-       (execute-actions store conn (actions/get-keypress-actions @store {:key (.-key e)} e)))))
+       (execute-actions store conn (actions/get-keypress-actions @conn {:key (.-key e)} e)))))
   (swap! store assoc :booted-at (.getTime (js/Date.))))

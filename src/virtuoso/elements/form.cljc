@@ -2,18 +2,20 @@
   (:require [virtuoso.elements.layout :as layout]
             [virtuoso.elements.button :as button]))
 
-(defn prepare-select [state path options & [default]]
-  (let [current (or (get-in state path) default (ffirst options))]
+(defn prepare-select [e a options & [default]]
+  (let [current (or (get e a) default (ffirst options))]
     {:input/kind :input.kind/select
-     :on {:input [[:action/assoc-in path (cond
-                                           (keyword? current)
-                                           :event/target-value-kw
+     :on {:input [[:action/transact
+                   [[:db/add (:db/id e) a]
+                    (cond
+                      (keyword? current)
+                      :event/target-value-kw
 
-                                           (number? current)
-                                           :event/target-value-num
+                      (number? current)
+                      :event/target-value-num
 
-                                           :else
-                                           :event/target-value)]]}
+                      :else
+                      :event/target-value)]]]}
      :options (for [[v t] options]
                 (cond-> {:value (cond
                                   (keyword? v)
@@ -25,22 +27,22 @@
                          :text t}
                   (= v current) (assoc :selected? true)))}))
 
-(defn prepare-multi-select [state path options & [default]]
-  (let [current (set (or (get-in state path) default))]
+(defn prepare-multi-select [e a options & [default]]
+  (let [current (set (or (get e a) default))]
     {:input/kind :input.kind/pill-select
      :options
      (for [v options]
        (cond-> {:text (str v)
-                :on {:click [[:action/assoc-in path
+                :on {:click [[:action/transact
                               (if (current v)
-                                (disj current v)
-                                (conj current v))]]}}
+                                [[:db/retract (:db/id e) a v]]
+                                [[:db/add (:db/id e) a v]])]]}}
          (current v) (assoc :selected? true)))}))
 
-(defn prepare-number-input [state path & [default]]
+(defn prepare-number-input [e a & [default]]
   {:input/kind :input.kind/number
-   :on {:input [[:action/assoc-in path :event/target-value-num]]}
-   :value (or (get-in state path) default)})
+   :on {:input [[:action/transact [[:db/add (:db/id e) a :event/target-value-num]]]]}
+   :value (or (get e a) default)})
 
 ;; Rendering
 

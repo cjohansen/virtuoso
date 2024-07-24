@@ -1,9 +1,12 @@
 (ns virtuoso.ui.actions
-  (:require [clojure.walk :as walk]))
+  (:require [clojure.walk :as walk]
+            [datascript.core :as d]))
 
-(defmulti get-keypress-actions (fn [state _e] (:action/keypress-handler state)))
+(defmulti get-keypress-actions
+  (fn [db _e]
+    (:action/keypress-handler (d/entity db :virtuoso/current-view))))
 
-(defmethod get-keypress-actions :default [_state _e])
+(defmethod get-keypress-actions :default [_db _e])
 
 (defmulti execute-side-effect! (fn [_store _conn {:keys [kind]}] kind))
 
@@ -24,26 +27,12 @@
        :else x))
    data))
 
-(defmethod perform-action :action/assoc-in [_ _ _ args]
-  [{:kind ::assoc-in
-    :args args}])
-
 (defn perform-actions [state db actions]
   (mapcat
    (fn [[action & args]]
      (apply println "[virtuoso.ui.action]" action args)
      (perform-action state db action args))
-   actions))
-
-(defn assoc-in* [m args]
-  (reduce
-   (fn [m [path v]]
-     (assoc-in m path v))
-   m
-   (partition 2 args)))
-
-(defmethod execute-side-effect! ::assoc-in [store _ {:keys [args]}]
-  (swap! store assoc-in* args))
+   (remove nil? actions)))
 
 (defn execute! [store conn effects]
   (doseq [effect effects]

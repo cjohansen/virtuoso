@@ -183,7 +183,7 @@
   [bars]
   (for [bar bars]
     (let [beats (:metronome/accentuate-beats bar)]
-      (cond-> bar
+      (cond-> (into {} bar)
         beats (dissoc :metronome/accentuate-beats)
         beats (assoc :accentuate? (comp (set beats) :bar/beat))))))
 
@@ -203,7 +203,7 @@
                              (let [i (rand-int 100)]
                                (< pct i))))))
                      (some-> (:metronome/click-beats bar) set (comp :bar/beat)))]
-      (cond-> bar
+      (cond-> (into {} bar)
         click? (dissoc :metronome/click-beats :metronome/drop-pct)
         click? (assoc :click? click?)))))
 

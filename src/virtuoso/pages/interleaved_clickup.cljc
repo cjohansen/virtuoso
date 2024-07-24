@@ -1,5 +1,6 @@
 (ns virtuoso.pages.interleaved-clickup
   (:require [clojure.string :as str]
+            [datascript.core :as d]
             [phosphor.icons :as icons]
             [virtuoso.elements.form :as form]
             [virtuoso.elements.layout :as layout]
@@ -49,117 +50,118 @@
   [[:start/beginning "the top"]
    [:start/end "the bottom"]])
 
-(defn started? [{:keys [icu]}]
-  (::icu/tempo-current icu))
+(defn started? [activity]
+  (::icu/tempo-current activity))
 
-(defn decrease-tempo [options]
-  (when-not (:paused? options)
-    (when-let [tempo (icu/decrease-tempo options)]
-      [[:action/assoc-in [:icu ::icu/tempo-current] tempo]
-       [:action/start-metronome options tempo]])))
+(defn decrease-tempo [activity]
+  (when-not (:activity/paused? activity)
+    (when-let [tempo (icu/decrease-tempo activity)]
+      [[:action/transact [[:db/add (:db/id activity) ::icu/tempo-current tempo]]]
+       [:action/start-metronome activity tempo]])))
 
-(defn increase-tempo [options]
-  (when-not (:paused? options)
-    (let [tempo (icu/increase-tempo options)]
-      [[:action/assoc-in [:icu ::icu/tempo-current] tempo]
-       [:action/start-metronome options tempo]])))
+(defn increase-tempo [activity]
+  (when-not (:activity/paused? activity)
+    (let [tempo (icu/increase-tempo activity)]
+      [[:action/transact [[:db/add (:db/id activity) ::icu/tempo-current tempo]]]
+       [:action/start-metronome activity tempo]])))
 
-(defn change-phrase [options next-phrase]
-  (when-not (:paused? options)
+(defn change-phrase [activity next-phrase]
+  (when-not (:activity/paused? activity)
     (when next-phrase
-      (let [tempo (icu/get-tempo-start options)]
-        [[:action/assoc-in
-          [:icu ::icu/tempo-current] tempo
-          [:icu ::icu/phrase-current] next-phrase]
-         [:action/start-metronome options tempo]]))))
+      (let [tempo (icu/get-tempo-start activity)]
+        [[:action/transact
+          [[:db/add (:db/id activity) ::icu/tempo-current tempo]
+           [:db/add (:db/id activity) ::icu/phrase-current next-phrase]]]
+         [:action/start-metronome activity tempo]]))))
 
-(defn forward-phrase [options]
-  (when-not (:paused? options)
-    (->> (icu/get-next-phrase options)
-         (change-phrase options))))
+(defn forward-phrase [activity]
+  (when-not (:activity/paused? activity)
+    (->> (icu/get-next-phrase activity)
+         (change-phrase activity))))
 
-(defn backward-phrase [options]
-  (when-not (:paused? options)
-    (->> (icu/get-prev-phrase options)
-         (change-phrase options))))
+(defn backward-phrase [activity]
+  (when-not (:activity/paused? activity)
+    (->> (icu/get-prev-phrase activity)
+         (change-phrase activity))))
 
-(defn stop [options]
-  [[:action/assoc-in [:icu] (dissoc options
-                                    ::icu/tempo-current
-                                    ::icu/phrase-current
-                                    :paused?)]
+(defn stop [activity]
+  [[:action/transact
+    [[:db/retract (:db/id activity) ::icu/tempo-current]
+     [:db/retract (:db/id activity) ::icu/phrase-current]
+     [:db/retract (:db/id activity) :activity/paused?]]]
    [:action/stop-metronome]])
 
-(defn pause []
-  [[:action/assoc-in [:icu :paused?] true]
+(defn pause [activity]
+  [[:action/transact [[:db/add (:db/id activity) :activity/paused? true]]]
    [:action/stop-metronome]])
 
-(defn play [options]
-  (when (:paused? options)
-    [[:action/assoc-in [:icu :paused?] false]
-     [:action/start-metronome options (icu/get-tempo options)]]))
+(defn play [activity]
+  (when (:activity/paused? activity)
+    [[:action/transact [[:db/add (:db/id activity) :activity/paused? false]]]
+     [:action/start-metronome activity (icu/get-tempo activity)]]))
 
-(defmethod actions/get-keypress-actions ::tool [state data e]
-  (when (started? state)
-    (when e
-      (.preventDefault e)
-      (.stopPropagation e))
-    (case (:key data)
-      "+" (increase-tempo (:icu state))
-      "-" (decrease-tempo (:icu state))
-      " " (if (:paused? (:icu state))
-            (play (:icu state))
-            (pause))
-      "n" (forward-phrase (:icu state))
-      "p" (backward-phrase (:icu state))
-      nil)))
+(defmethod actions/get-keypress-actions ::tool [db data e]
+  (let [activity (:view/tool (d/entity db :virtuoso/current-view))]
+    (when (started? activity)
+      (when e
+        (.preventDefault e)
+        (.stopPropagation e))
+      (case (:key data)
+        "+" (increase-tempo activity)
+        "-" (decrease-tempo activity)
+        " " (if (:activity/paused? activity)
+              (play activity)
+              (pause activity))
+        "n" (forward-phrase activity)
+        "p" (backward-phrase activity)
+        nil))))
 
-(defn prepare-icu [state _db]
-  (let [label (phrase-label (get-in state [:icu ::icu/phrase-kind]))]
+(defn prepare-icu [activity]
+  (let [label (phrase-label (::icu/phrase-kind activity))]
     {:spacing :wide
      :sections
      [{:kind :element.kind/colored-boxes
-       :footer {:text (str (get-in state [:icu ::icu/tempo-current]) " BPM")}
-       :bpm (get-in state [:icu ::icu/tempo-current])
-       :boxes (->> (icu/get-phrases (:icu state))
-                   (icu/select-phrases (:icu state))
+       :footer {:text (str (::icu/tempo-current activity) " BPM")}
+       :bpm (::icu/tempo-current activity)
+       :boxes (->> (icu/get-phrases activity)
+                   (icu/select-phrases activity)
                    (map (fn [idx]
                           {:text (str label " " (inc idx))
                            :color-idx idx})))}
       {:kind :element.kind/button-panel
        :buttons (for [button [{:text "Lower BPM"
                                :icon (icons/icon :phosphor.bold/minus)
-                               :actions (decrease-tempo (:icu state))
+                               :actions (decrease-tempo activity)
                                :kbd "-"}
                               {:text "Previous phrase"
                                :icon (icons/icon :phosphor.fill/skip-back)
-                               :actions (backward-phrase (:icu state))
+                               :actions (backward-phrase activity)
                                :kbd "p"}
-                              (if (get-in state [:icu :paused?])
+                              (if (:activity/paused? activity)
                                 {:text "Play"
                                  :icon (icons/icon :phosphor.fill/play)
-                                 :actions (play (:icu state))
+                                 :actions (play activity)
                                  :size :large
                                  :kbd "space"}
                                 {:text "Pause"
                                  :icon (icons/icon :phosphor.fill/pause)
-                                 :actions (pause)
+                                 :actions (pause activity)
                                  :size :large
                                  :kbd "space"})
                               {:text "Next phrase"
                                :icon (icons/icon :phosphor.fill/skip-forward)
-                               :actions (forward-phrase (:icu state))
+                               :actions (forward-phrase activity)
                                :kbd "n"}
                               {:text "Bump BPM"
                                :icon (icons/icon :phosphor.bold/plus)
-                               :actions (increase-tempo (:icu state))
+                               :actions (increase-tempo activity)
                                :kbd "+"}]]
                   (cond-> button
                     (nil? (:actions button)) (assoc :disabled? true)))}
       {:kind :element.kind/footer
        :button {:text "Start over"
                 :subtle? true
-                :actions (stop (:icu state))}}
+                :actions (stop activity)}}
       {:kind :element.kind/footer
        :heading "How to use"
        :text (str "Play the indicated " (str/lower-case label) " once, then
@@ -168,58 +170,74 @@
        Click the skip button or the n key on your keyboard to add
        a " (str/lower-case label) ", then repeat the process.")}]}))
 
-(defn prepare-settings [state _db]
+#_(defn prepare-time-signature [activity]
+  (let [[numerator denominator] (:music/time-signature activity)]
+    {:label "Time signature"
+     :inputs
+     [{:input/kind :input.kind/number
+       :on {:input [[:action/transact [[:db/add (:db/id activity :music/time-signature) [:event/target-value-num denominator]]]]]}
+       :value numerator}
+      {:input/kind :input.kind/select
+       :on {:input [[:action/transact [[:db/add (:db/id activity :music/time-signature) [numerator :event/target-value-num]]]]]}
+       :options (for [i denominators]
+                  (cond-> {:value (str i) :text (str i)}
+                    (= i denominator) (assoc :selected? true)))}]}))
+
+(defn prepare-settings [activity]
   {:sections
    [{:kind :element.kind/boxed-form
      :button {:text "Start"
               :right-icon (icons/icon :phosphor.regular/metronome)
-              :actions (let [tempo (get-in state [:icu ::icu/tempo-start])]
-                         [[:action/assoc-in
-                           [:icu ::icu/tempo-current] tempo
-                           [:icu ::icu/phrase-current] (icu/get-next-phrase (:icu state))]
-                          [:action/start-metronome (:icu state) tempo]])}
+              :actions (let [tempo (::icu/tempo-start activity)]
+                         [[:action/transact
+                           [{:db/id (:db/id activity)
+                             ::icu/tempo-current tempo
+                             ::icu/phrase-current (icu/get-next-phrase activity)}]]
+                          [:action/start-metronome activity tempo]])}
      :boxes
      [{:title "Exercise details"
        :fields
        [{:controls
          [{:label "Length"
            :inputs
-           [(form/prepare-number-input state [:icu ::icu/phrase-count])
-            (form/prepare-select state [:icu ::icu/phrase-kind] phrase-kinds)]}]}]}
+           [(form/prepare-number-input activity ::icu/phrase-count)
+            (form/prepare-select activity ::icu/phrase-kind phrase-kinds)]}
+          #_(prepare-time-signature activity)]}]}
 
       {:title "Session settings"
        :fields [{:controls
                  [{:label "Start at"
-                   :inputs [(form/prepare-select state [:icu ::icu/start-at] starts)]}
+                   :inputs [(form/prepare-select activity ::icu/start-at starts)]}
                   {:label "Max phrase length"
-                   :inputs [(form/prepare-number-input state [:icu ::icu/phrase-max])]}]}]}
+                   :inputs [(form/prepare-number-input activity ::icu/phrase-max)]}]}]}
 
-      (let [beats (range 1 (inc (first (get-in state [:icu :music/time-signature]))))]
+      (let [beats (range 1 (inc (first (:music/time-signature activity))))]
         {:title "Metronome settings"
          :fields
          [{:size :md
            :controls
            [{:label "Start tempo"
-             :inputs [(form/prepare-number-input state [:icu ::icu/tempo-start])]}
+             :inputs [(form/prepare-number-input activity ::icu/tempo-start)]}
             {:label "BPM step"
-             :inputs [(form/prepare-number-input state [:icu ::icu/tempo-step])]}
+             :inputs [(form/prepare-number-input activity ::icu/tempo-step)]}
             {:label "Drop beats (%)"
-             :inputs [(form/prepare-number-input state [:icu :metronome/drop-pct])]}]}
+             :inputs [(form/prepare-number-input activity :metronome/drop-pct)]}]}
           {:controls
            [{:label "Click beats"
-             :inputs [(form/prepare-multi-select state [:icu :metronome/click-beats] beats)]}]}
+             :inputs [(form/prepare-multi-select activity :metronome/tick-beats beats)]}]}
           {:controls
            [{:label "Accentuate beats"
-             :inputs [(form/prepare-multi-select state [:icu :metronome/accentuate-beats] beats)]}]}]})]}]})
+             :inputs [(form/prepare-multi-select activity :metronome/accentuate-beats beats)]}]}]})]}]})
 
-(defn prepare-ui-data [state db]
-  (if (started? state)
-    (prepare-icu state db)
-    (prepare-settings state db)))
+(defn prepare-ui-data [_state db]
+  (let [activity (:view/tool (d/entity db :virtuoso/current-view))]
+    (if (started? activity)
+      (prepare-icu activity)
+      (prepare-settings activity))))
 
 (defn get-settings [{::icu/keys [phrase-max phrase-count phrase-kind
                                  start-at tempo-start tempo-step]
-                     :metronome/keys [click-beats accentuate-beats drop-pct]
+                     :metronome/keys [tick-beats accentuate-beats drop-pct]
                      :as settings}]
   (let [beats (or (get (:music/time-signature settings) 0) 4)]
     {::icu/phrase-count (or phrase-count 4)
@@ -230,18 +248,12 @@
      ::icu/tempo-step (or tempo-step 5)
      :music/time-signature [beats (or (get (:music/time-signature settings) 1) 4)]
      :metronome/drop-pct (or drop-pct 0)
-     :metronome/click-beats (or click-beats (set (range 1 (inc beats))))
+     :metronome/tick-beats (or tick-beats (set (range 1 (inc beats))))
      :metronome/accentuate-beats (or accentuate-beats settings #{1})}))
 
-(defn get-boot-actions [state _db]
-  (let [settings (get-settings (:icu state))]
-    (into [[:action/assoc-in [:action/keypress-handler] ::tool]
-
-           (when (and (not (started? state))
-                      (not= (:icu state) settings))
-             [:action/assoc-in [:icu] settings])]
-          (keep
-           (fn [[k v]]
-             (when (nil? (get-in state [:icu k]))
-               [:action/assoc-in [:icu k] v]))
-           settings))))
+(defn get-boot-actions [_state db]
+  [[:action/transact
+    [{:db/ident :virtuoso/current-view
+      :action/keypress-handler ::tool
+      :view/tool (into {:db/ident ::tool}
+                       (get-settings (d/entity db ::tool)))}]]])
