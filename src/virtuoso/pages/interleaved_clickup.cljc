@@ -111,8 +111,11 @@
     [[:action/db.add activity :activity/paused? false]
      [:action/start-metronome activity (icu/get-tempo activity)]]))
 
+(defn get-activity [db]
+  (:view/tool (d/entity db :virtuoso/current-view)))
+
 (defmethod actions/get-keypress-actions ::tool [db data e]
-  (let [activity (:view/tool (d/entity db :virtuoso/current-view))]
+  (let [activity (get-activity db)]
     (when (started? activity)
       (when e
         (.preventDefault e)
@@ -241,7 +244,7 @@
              :inputs [(form/prepare-multi-select activity :metronome/accentuate-beats beats)]}]}]})]}]})
 
 (defn prepare-ui-data [db]
-  (let [activity (:view/tool (d/entity db :virtuoso/current-view))]
+  (let [activity (get-activity db)]
     (if (started? activity)
       (prepare-icu activity)
       (prepare-settings activity))))
