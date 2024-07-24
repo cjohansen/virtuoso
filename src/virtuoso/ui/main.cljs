@@ -44,6 +44,17 @@
     (catch :default e
       (throw (ex-info "Failed to transact data" {:tx-data args} e)))))
 
+(defn get-eid [e]
+  (or (:db/id e) e))
+
+(defmethod actions/perform-action :action/db.add [_ _ [e a v]]
+  [{:kind ::transact
+    :args [[:db/add (get-eid e) a v]]}])
+
+(defmethod actions/perform-action :action/db.retract [_ _ [e a v]]
+  [{:kind ::transact
+    :args [[:db/retract (get-eid e) a v]]}])
+
 (defmethod actions/perform-action :action/transact [_ _ [tx-data]]
   [{:kind ::transact
     :args tx-data}])

@@ -56,13 +56,13 @@
 (defn decrease-tempo [activity]
   (when-not (:activity/paused? activity)
     (when-let [tempo (icu/decrease-tempo activity)]
-      [[:action/transact [[:db/add (:db/id activity) ::icu/tempo-current tempo]]]
+      [[:action/db.add activity ::icu/tempo-current tempo]
        [:action/start-metronome activity tempo]])))
 
 (defn increase-tempo [activity]
   (when-not (:activity/paused? activity)
     (let [tempo (icu/increase-tempo activity)]
-      [[:action/transact [[:db/add (:db/id activity) ::icu/tempo-current tempo]]]
+      [[:action/db.add activity ::icu/tempo-current tempo]
        [:action/start-metronome activity tempo]])))
 
 (defn change-phrase [activity next-phrase]
@@ -92,12 +92,12 @@
    [:action/stop-metronome]])
 
 (defn pause [activity]
-  [[:action/transact [[:db/add (:db/id activity) :activity/paused? true]]]
+  [[:action/db.add activity :activity/paused? true]
    [:action/stop-metronome]])
 
 (defn play [activity]
   (when (:activity/paused? activity)
-    [[:action/transact [[:db/add (:db/id activity) :activity/paused? false]]]
+    [[:action/db.add activity :activity/paused? false]
      [:action/start-metronome activity (icu/get-tempo activity)]]))
 
 (defmethod actions/get-keypress-actions ::tool [db data e]
@@ -175,10 +175,10 @@
     {:label "Time signature"
      :inputs
      [{:input/kind :input.kind/number
-       :on {:input [[:action/transact [[:db/add (:db/id activity :music/time-signature) [:event/target-value-num denominator]]]]]}
+       :on {:input [[:action/db.add activity :music/time-signature [:event/target-value-num denominator]]]}
        :value numerator}
       {:input/kind :input.kind/select
-       :on {:input [[:action/transact [[:db/add (:db/id activity :music/time-signature) [numerator :event/target-value-num]]]]]}
+       :on {:input [[:action/db.add activity :music/time-signature [numerator :event/target-value-num]]]}
        :options (for [i denominators]
                   (cond-> {:value (str i) :text (str i)}
                     (= i denominator) (assoc :selected? true)))}]}))

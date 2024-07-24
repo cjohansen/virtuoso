@@ -22,7 +22,7 @@
      (cond
        (= :event/key x) (.-key event)
        (= :event/target-value x) (some-> event .-target .-value)
-       (= :event/target-value-num x) (some-> event .-target .-value .trim parse-number)
+       (= :event/target-value-num x) (or (some-> event .-target .-value .trim parse-number) 0)
        (= :event/target-value-kw x) (some-> event .-target .-value .trim keyword)
        :else x))
    data))

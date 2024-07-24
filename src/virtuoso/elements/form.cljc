@@ -5,17 +5,16 @@
 (defn prepare-select [e a options & [default]]
   (let [current (or (get e a) default (ffirst options))]
     {:input/kind :input.kind/select
-     :on {:input [[:action/transact
-                   [[:db/add (:db/id e) a]
-                    (cond
-                      (keyword? current)
-                      :event/target-value-kw
+     :on {:input [[:action/db.add e a
+                   (cond
+                     (keyword? current)
+                     :event/target-value-kw
 
-                      (number? current)
-                      :event/target-value-num
+                     (number? current)
+                     :event/target-value-num
 
-                      :else
-                      :event/target-value)]]]}
+                     :else
+                     :event/target-value)]]}
      :options (for [[v t] options]
                 (cond-> {:value (cond
                                   (keyword? v)
@@ -33,15 +32,14 @@
      :options
      (for [v options]
        (cond-> {:text (str v)
-                :on {:click [[:action/transact
-                              (if (current v)
-                                [[:db/retract (:db/id e) a v]]
-                                [[:db/add (:db/id e) a v]])]]}}
+                :on {:click (if (current v)
+                              [[:action/db.retract e a v]]
+                              [[:action/db.add e a v]])}}
          (current v) (assoc :selected? true)))}))
 
 (defn prepare-number-input [e a & [default]]
   {:input/kind :input.kind/number
-   :on {:input [[:action/transact [[:db/add (:db/id e) a :event/target-value-num]]]]}
+   :on {:input [[:action/db.add e a :event/target-value-num]]}
    :value (or (get e a) default)})
 
 ;; Rendering
