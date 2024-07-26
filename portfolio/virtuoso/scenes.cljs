@@ -3,6 +3,7 @@
             [virtuoso.elements.brain-scenes]
             [virtuoso.elements.button-panel-scenes]
             [virtuoso.elements.button-scenes]
+            [virtuoso.elements.colored-boxes-scenes]
             [virtuoso.elements.form-scenes]
             [virtuoso.elements.layout-scenes]
             [virtuoso.elements.typography-scenes]))
@@ -10,6 +11,7 @@
 :virtuoso.elements.brain-scenes/keep
 :virtuoso.elements.button-panel-scenes/keep
 :virtuoso.elements.button-scenes/keep
+:virtuoso.elements.colored-boxes-scenes/keep
 :virtuoso.elements.form-scenes/keep
 :virtuoso.elements.layout-scenes/keep
 :virtuoso.elements.typography-scenes/keep
