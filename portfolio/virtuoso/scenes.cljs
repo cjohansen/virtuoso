@@ -1,5 +1,6 @@
 (ns virtuoso.scenes
   (:require [portfolio.ui :as ui]
+            [virtuoso.elements.bar-scenes]
             [virtuoso.elements.brain-scenes]
             [virtuoso.elements.button-panel-scenes]
             [virtuoso.elements.button-scenes]
@@ -8,6 +9,7 @@
             [virtuoso.elements.layout-scenes]
             [virtuoso.elements.typography-scenes]))
 
+:virtuoso.elements.bar-scenes/keep
 :virtuoso.elements.brain-scenes/keep
 :virtuoso.elements.button-panel-scenes/keep
 :virtuoso.elements.button-scenes/keep
