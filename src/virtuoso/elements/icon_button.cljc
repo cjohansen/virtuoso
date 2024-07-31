@@ -41,7 +41,7 @@
 
 (defn bare-icon-button [{:keys [text size theme icon actions]}]
   (let [theme (if (bare-theme-class theme) theme :neutral)]
-    [:div
+    [:div.cursor-pointer
      {:title text
       :class (bare-theme-class theme)
       :on {:click actions}}
