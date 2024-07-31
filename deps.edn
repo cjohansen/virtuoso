@@ -12,8 +12,7 @@
         :extra-deps {cider/piggieback {:mvn/version "0.5.3"}
                      com.bhauman/figwheel-main {:mvn/version "0.2.18"}
                      cjohansen/gadget-inspector {:mvn/version "0.2023.04.12"}
-                     no.cjohansen/portfolio {:git/url "https://github.com/cjohansen/portfolio"
-                                             :sha "f28b08e04d8f27339916cceaa0dad6ce940ed8f4"}
+                     no.cjohansen/portfolio {:mvn/version "2024.03.18"}
                      kaocha-noyoda/kaocha-noyoda {:mvn/version "2019-06-03"}
                      lambdaisland/kaocha {:mvn/version "1.87.1366"}}}
   :test {:exec-fn kaocha.runner/exec-fn
