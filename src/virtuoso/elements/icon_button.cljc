@@ -18,9 +18,12 @@
    :warn "btn-error"
    :success "btn-success"})
 
-(defn icon-button [{:keys [text size theme icon icon-size actions disabled?]}]
+(defn icon-button [{:keys [text size theme icon icon-after-label icon-size actions disabled?]}]
   (let [size (if (button-icon-size size) size :medium)
-        theme (if (theme-class theme) theme :info)]
+        theme (if (theme-class theme) theme :info)
+        icon-el (icons/render icon
+                              {:class (or (get-in button-icon-size [size icon-size])
+                                          (get-in button-icon-size [size :medium]))})]
     [:div.btn.btn-circle
      {:title text
       :class [(when (= :large size) :btn-lg)
@@ -29,9 +32,11 @@
               (when disabled? :btn-disabled)
               (theme-class theme)]
       :on {:click actions}}
-     (icons/render icon
-      {:class (or (get-in button-icon-size [size icon-size])
-                  (get-in button-icon-size [size :medium]))})]))
+     (if icon-after-label
+       [:div.flex.items-center.text-lg
+        icon-el
+        icon-after-label]
+       icon-el)]))
 
 (def bare-theme-class
   {:info "text-info"

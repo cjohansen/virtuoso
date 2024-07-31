@@ -77,6 +77,14 @@
      :icon (icons/icon :phosphor.regular/music-notes-plus)
      :theme :success})])
 
+(defscene with-text
+  (icon-button/icon-button
+   {:text "Click"
+    :icon (icons/icon :phosphor.bold/plus)
+    :icon-size :small
+    :icon-after-label "5"
+    :theme :warn}))
+
 (defscene bare-buttons
   [:div
    [:div.flex.gap-8.items-center
