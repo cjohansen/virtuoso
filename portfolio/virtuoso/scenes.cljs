@@ -1,5 +1,6 @@
 (ns virtuoso.scenes
   (:require [portfolio.ui :as ui]
+            [replicant.dom :as replicant]
             [virtuoso.elements.bar-scenes]
             [virtuoso.elements.brain-scenes]
             [virtuoso.elements.button-panel-scenes]
@@ -19,6 +20,8 @@
 :virtuoso.elements.icon-button-scenes/keep
 :virtuoso.elements.layout-scenes/keep
 :virtuoso.elements.typography-scenes/keep
+
+(replicant/set-dispatch! #(prn %3))
 
 (defonce app
   (ui/start!
