@@ -12,7 +12,7 @@
      ;; set of numbers #{1}
      :metronome/accentuate-beats {:db/cardinality :db.cardinality/many}
      ;; set of numbers #{1 2 3 4}
-     :metronome/tick-beats {:db/cardinality :db.cardinality/many}
+     :metronome/click-beats {:db/cardinality :db.cardinality/many}
      ;; number, percentage of beats to randomly drop
      :metronome/drop-pct {}
 

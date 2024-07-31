@@ -238,7 +238,7 @@
              :inputs [(form/prepare-number-input activity :metronome/drop-pct)]}]}
           {:controls
            [{:label "Click beats"
-             :inputs [(form/prepare-multi-select activity :metronome/tick-beats beats)]}]}
+             :inputs [(form/prepare-multi-select activity :metronome/click-beats beats)]}]}
           {:controls
            [{:label "Accentuate beats"
              :inputs [(form/prepare-multi-select activity :metronome/accentuate-beats beats)]}]}]})]}]})
@@ -251,7 +251,7 @@
 
 (defn get-settings [{::icu/keys [phrase-max phrase-count phrase-kind
                                  start-at tempo-start tempo-step]
-                     :metronome/keys [tick-beats accentuate-beats drop-pct]
+                     :metronome/keys [click-beats accentuate-beats drop-pct]
                      :as settings}]
   (let [beats (or (get (:music/time-signature settings) 0) 4)]
     {::icu/phrase-count (or phrase-count 4)
@@ -262,7 +262,7 @@
      ::icu/tempo-step (or tempo-step 5)
      :music/time-signature [beats (or (get (:music/time-signature settings) 1) 4)]
      :metronome/drop-pct (or drop-pct 0)
-     :metronome/tick-beats (or tick-beats (set (range 1 (inc beats))))
+     :metronome/click-beats (or click-beats (set (range 1 (inc beats))))
      :metronome/accentuate-beats (or accentuate-beats settings #{1})}))
 
 (defn get-boot-actions [db]
