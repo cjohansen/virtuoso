@@ -1,6 +1,7 @@
 (ns virtuoso.elements.bar
   (:require [phosphor.icons :as icons]
-            [virtuoso.elements.form :as form]))
+            [virtuoso.elements.form :as form]
+            [virtuoso.elements.icon-button :as icon-button]))
 
 (def sizes
   {:medium 2.5
@@ -59,7 +60,7 @@
          [:div {:style {:min-height (icon-size size)}}
           (icon-button button {:size size})]))]))
 
-(defn bar [{:keys [beats subdivision tempo reps dots size]}]
+(defn bar [{:keys [beats subdivision tempo reps dots size buttons]}]
   (let [size (if (sizes size) size :medium)
         rem-size (sizes size)
         height (str rem-size "rem")]
@@ -100,10 +101,15 @@
          [:div.bg-neutral-content.mr-1 {:class (bar-line-thin size)}]
          [:div.bg-neutral-content {:class (bar-line-thick size)}]])
       (when reps
-        [:div.pl-2.relative.flex.flex-col.justify-around
+        [:div.pl-2.relative.flex.flex-col.justify-around.items-start
          (icon-button (:button-above reps) {:size size})
          [:span {:class (rep-text-size size)} (:val reps) " " (:unit reps)]
-         (icon-button (:button-below reps) {:size size})])]
+         (icon-button (:button-below reps) {:size size})])
+      ;; Buttons
+      (when (seq buttons)
+        [:div.relative.flex.ml-4.gap-4.items-center
+         (for [button buttons]
+           (icon-button/bare-icon-button button))])]
      ;; Dots
      (when dots
        [:div.flex.justify-between.gap-1
@@ -127,4 +133,12 @@
 
 (defn bars [{:keys [bars buttons]}]
   [:div.flex.gap-4
-   (map bar bars)])
+   (map bar bars)
+   (let [size (:size (first bars))
+         size (if (sizes size) size :medium)]
+     (for [button buttons]
+       [:div.flex.items-center {:style {:height (str (sizes size) "rem")}}
+        (icon-button/icon-button
+         (-> button
+             (assoc :size :small)
+             (update :theme #(or % :success))))]))])

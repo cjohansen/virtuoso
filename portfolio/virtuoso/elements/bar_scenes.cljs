@@ -66,20 +66,6 @@
                            (assoc :current? true)))
                        (:dots bar))))))
 
-(defscene multiple-bars
-  (bar/bars
-   {:bars [{:beats {:val 4}
-            :subdivision {:val 4}
-            :tempo {:val 60 :unit "BPM"}
-            :reps {:val 2 :unit "times"}
-            :dots [{:highlight? true} {} {} {}]}
-           {:beats {:val 12}
-            :subdivision {:val 8}
-            :tempo {:val 70 :unit "BPM"}
-            :dots [{:highlight? true} {} {}
-                   {:disabled? true} {} {} {} {} {}
-                   {:disabled? true} {} {}]}]}))
-
 (defscene bar-with-buttons
   (bar/bar
    {:beats {:val 4
@@ -91,6 +77,10 @@
                   :left-button {:icon (icons/icon :phosphor.regular/minus-circle)}
                   :right-button {:icon (icons/icon :phosphor.regular/plus-circle)
                                  :actions []}}
+    :buttons [{:text "Remove bar"
+               :icon (icons/icon :phosphor.regular/minus-circle)
+               :theme :warn
+               :actions []}]
     :dots [{:highlight? true} {} {} {}]}))
 
 (defscene editable-big-bar
@@ -153,3 +143,25 @@
     :tempo {:val 70 :unit "BPM" :actions [] :default? true}
     :dots [{:highlight? true} {} {} {}]
     :size :large}))
+
+(defscene multiple-bars
+  (bar/bars
+   {:bars [{:beats {:val 4}
+            :subdivision {:val 4}
+            :tempo {:val 60 :unit "BPM"}
+            :reps {:val 2 :unit "times"}
+            :dots [{:highlight? true} {} {} {}]}
+           {:beats {:val 12}
+            :subdivision {:val 8}
+            :tempo {:val 70 :unit "BPM"}
+            :dots [{:highlight? true} {} {}
+                   {:disabled? true} {} {} {} {} {}
+                   {:disabled? true} {} {}]
+            :buttons [{:text "Remove bar"
+                       :icon (icons/icon :phosphor.regular/minus-circle)
+                       :theme :warn
+                       :actions []}]}]
+    :buttons [{:text "Add bar"
+               :icon (icons/icon :phosphor.regular/music-notes-plus)
+               :icon-size :large
+               :actions []}]}))
