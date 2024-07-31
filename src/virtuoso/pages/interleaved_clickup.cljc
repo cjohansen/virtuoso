@@ -68,13 +68,13 @@
   (when-not (:activity/paused? activity)
     (when-let [tempo (icu/decrease-tempo activity)]
       [[:action/db.add activity ::icu/tempo-current tempo]
-       [:action/start-metronome activity tempo]])))
+       [:action/start-metronome [activity] tempo]])))
 
 (defn increase-tempo [activity]
   (when-not (:activity/paused? activity)
     (let [tempo (icu/increase-tempo activity)]
       [[:action/db.add activity ::icu/tempo-current tempo]
-       [:action/start-metronome activity tempo]])))
+       [:action/start-metronome [activity] tempo]])))
 
 (defn change-phrase [activity next-phrase]
   (when-not (:activity/paused? activity)
@@ -83,7 +83,7 @@
         [[:action/transact
           [[:db/add (:db/id activity) ::icu/tempo-current tempo]
            [:db/add (:db/id activity) ::icu/phrase-current next-phrase]]]
-         [:action/start-metronome activity tempo]]))))
+         [:action/start-metronome [activity] tempo]]))))
 
 (defn forward-phrase [activity]
   (when-not (:activity/paused? activity)
@@ -109,7 +109,7 @@
 (defn play [activity]
   (when (:activity/paused? activity)
     [[:action/db.add activity :activity/paused? false]
-     [:action/start-metronome activity (icu/get-tempo activity)]]))
+     [:action/start-metronome [activity] (icu/get-tempo activity)]]))
 
 (defn get-activity [db]
   (:view/tool (d/entity db :virtuoso/current-view)))
@@ -207,7 +207,7 @@
                            [{:db/id (:db/id activity)
                              ::icu/tempo-current tempo
                              ::icu/phrase-current (icu/get-next-phrase activity)}]]
-                          [:action/start-metronome activity tempo]])}
+                          [:action/start-metronome [activity] tempo]])}
      :boxes
      [{:title "Exercise details"
        :fields

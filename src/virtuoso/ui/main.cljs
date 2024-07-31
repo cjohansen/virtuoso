@@ -12,8 +12,8 @@
 (def ^:dynamic *on-render* nil)
 
 (defmethod actions/execute-side-effect! ::start-metronome [_ {:keys [args]}]
-  (let [[bar tempo] args]
-    (cond->> [bar]
+  (let [[bars tempo] args]
+    (cond->> bars
       :always metronome/click-beats
       :always metronome/accentuate-beats
       tempo (metronome/set-tempo tempo)
