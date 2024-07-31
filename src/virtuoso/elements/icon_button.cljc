@@ -7,7 +7,8 @@
            :large ["h-6" "w-6"]}
    :medium {:small ["h-4" "w-4"]
             :medium ["h-6" "w-6"]
-            :large ["h-8" "w-8"]}
+            :large ["h-8" "w-8"]
+            :xlarge ["h-10" "w-10"]}
    :large {:small ["h-5" "w-5"]
            :medium ["h-8" "w-8"]
            :large ["h-12" "w-12"]}})
@@ -31,3 +32,19 @@
      (icons/render icon
       {:class (or (get-in button-icon-size [size icon-size])
                   (get-in button-icon-size [size :medium]))})]))
+
+(def bare-theme-class
+  {:info "text-info"
+   :warn "text-error"
+   :success "text-success"
+   :neutral "text-neutral-content"})
+
+(defn bare-icon-button [{:keys [text size theme icon actions]}]
+  (let [theme (if (bare-theme-class theme) theme :neutral)]
+    [:div
+     {:title text
+      :class (bare-theme-class theme)
+      :on {:click actions}}
+     (icons/render icon
+                   {:class (or (get-in button-icon-size [:medium size])
+                               (get-in button-icon-size [:medium :medium]))})]))

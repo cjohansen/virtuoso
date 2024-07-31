@@ -76,3 +76,39 @@
     {:text "Click"
      :icon (icons/icon :phosphor.regular/music-notes-plus)
      :theme :success})])
+
+(defscene bare-buttons
+  [:div
+   [:div.flex.gap-8.items-center
+    (icon-button/bare-icon-button
+     {:text "Click"
+      :icon (icons/icon :phosphor.regular/music-notes-plus)
+      :size :small
+      :theme :neutral})
+    (icon-button/bare-icon-button
+     {:text "Click"
+      :icon (icons/icon :phosphor.regular/music-notes-plus)
+      :size :medium
+      :theme :neutral})
+    (icon-button/bare-icon-button
+     {:text "Click"
+      :icon (icons/icon :phosphor.regular/music-notes-plus)
+      :size :large
+      :theme :neutral})
+    (icon-button/bare-icon-button
+     {:text "Click"
+      :icon (icons/icon :phosphor.regular/music-notes-plus)
+      :size :xlarge
+      :theme :neutral})
+    (icon-button/bare-icon-button
+     {:text "Click"
+      :icon (icons/icon :phosphor.regular/music-notes-plus)
+      :theme :info})
+    (icon-button/bare-icon-button
+     {:text "Click"
+      :icon (icons/icon :phosphor.regular/music-notes-plus)
+      :theme :warn})
+    (icon-button/bare-icon-button
+     {:text "Click"
+      :icon (icons/icon :phosphor.regular/music-notes-plus)
+      :theme :success})]])
