@@ -8,7 +8,16 @@
            {:kind :element.kind/round-badge
             :text "150"
             :label "BPM"
-            :theme :success}))))
+            :theme :success})))
+
+  (testing "Dims badge when metronome is paused"
+    (is (= (sut/prepare-badge
+            {:music/tempo 150
+             :activity/paused? true})
+           {:kind :element.kind/round-badge
+            :text "150"
+            :label "BPM"
+            :theme :neutral}))))
 
 (deftest prepare-button-panel-test
   (testing "All buttons are enabled by default"
