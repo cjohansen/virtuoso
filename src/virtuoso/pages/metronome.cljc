@@ -2,6 +2,20 @@
   (:require [phosphor.icons :as icons]
             [virtuoso.metronome :as metronome]))
 
+(def schema
+  {:music/tempo {} ;; number, bpm
+   :music/time-signature {} ;; tuple of numbers [4 4]
+
+   ;; set of numbers #{1}
+   :metronome/accentuate-beats {:db/cardinality :db.cardinality/many}
+   ;; set of numbers #{1 2 3 4}
+   :metronome/click-beats {:db/cardinality :db.cardinality/many}
+   ;; number, percentage of beats to randomly drop
+   :metronome/drop-pct {}
+   ;; bars
+   :metronome/bars {:db/cardinality :db.cardinality/many
+                    :db/type :db.type/ref}})
+
 (defn get-step-size [activity]
   (or (:metronome/tempo-step-size activity) 5))
 

@@ -1,31 +1,17 @@
 (ns virtuoso.ui.db
   (:require [datascript.core :as d]
             [virtuoso.pages.interleaved-clickup :as icu]
-            [virtuoso.ui.actions :as actions]))
+            [virtuoso.ui.actions :as actions]
+            [virtuoso.pages.metronome :as metronome]))
 
 (defn connect []
   (d/create-conn
    (merge
-    {:ordered/idx {} ;; number, ordered collections
-
-     :music/tempo {} ;; number, bpm
-     :music/time-signature {} ;; tuple of numbers [4 4]
-
-     ;; set of numbers #{1}
-     :metronome/accentuate-beats {:db/cardinality :db.cardinality/many}
-     ;; set of numbers #{1 2 3 4}
-     :metronome/click-beats {:db/cardinality :db.cardinality/many}
-     ;; number, percentage of beats to randomly drop
-     :metronome/drop-pct {}
-     ;; bars
-     :metronome/bars {:db/cardinality :db.cardinality/many
-                      :db/type :db.type/ref}
-
+    {:activity/paused? {} ;; boolean
+     :ordered/idx {} ;; number, ordered collections
      :view/tool {:db/type :db.type/ref}
-
-     ;; Paused activity, boolean
-     :activity/paused? {}
      }
+    metronome/schema
     icu/schema)))
 
 (defmethod actions/execute-side-effect! ::transact [conn {:keys [args]}]
