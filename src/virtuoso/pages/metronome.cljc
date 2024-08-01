@@ -58,17 +58,24 @@
 (defn prepare-bar [activity bar paced-bar]
   (let [[beats subdivision] (:music/time-signature bar)
         beat-xs (range 1 (inc beats))
-        click-beat? (set (or (:metronome/click-beats bar) beat-xs))]
+        click-beat? (set (or (:metronome/click-beats bar) beat-xs))
+        base-actions (if (:activity/paused? activity) [] [[:action/stop-metronome]])]
     (cond-> {:beats {:val beats}
              :subdivision {:val subdivision}
              :dots (for [beat beat-xs]
-                     (let [click-it? (click-beat? beat)]
-                       (cond-> {}
-                         (not click-it?)
-                         (assoc :disabled? true)
+                     (cond
+                       (not (click-beat? beat))
+                       {:disabled? true
+                        :actions (conj base-actions [:action/db.add (:db/id bar) :metronome/click-beats beat])}
 
-                         (and click-it? (contains? (:metronome/accentuate-beats bar) beat))
-                         (assoc :highlight? true))))}
+                       (contains? (:metronome/accentuate-beats bar) beat)
+                       {:highlight? true
+                        :actions (into base-actions
+                                       [[:action/db.retract (:db/id bar) :metronome/accentuate-beats beat]
+                                        [:action/db.retract (:db/id bar) :metronome/click-beats beat]])}
+
+                       :else
+                       {:actions (conj base-actions [:action/db.add (:db/id bar) :metronome/accentuate-beats beat])}))}
       (:music/tempo bar)
       (assoc :tempo {:val (:music/tempo paced-bar)
                      :unit "BPM"})
@@ -81,7 +88,7 @@
       (assoc :buttons [{:text "Remove bar"
                         :icon (icons/icon :phosphor.regular/minus-circle)
                         :theme :warn
-                        :actions [[:action/transact [[:db/retractEntity (:db/id bar)]]]]}]))))
+                        :actions (conj base-actions [:action/transact [[:db/retractEntity (:db/id bar)]]])}]))))
 
 (defn prepare-bars [activity]
   (let [paced-bars (metronome/set-tempo (:music/tempo activity) (:metronome/bars activity))]
@@ -90,11 +97,14 @@
      :buttons [{:text "Add bar"
                 :icon (icons/icon :phosphor.regular/music-notes-plus)
                 :icon-size :large
-                :actions [[:action/transact
-                           [{:db/id (:db/id activity)
-                             :metronome/bars
-                             [{:ordered/idx (inc (apply max 0 (keep :ordered/idx (:metronome/bars activity))))
-                               :music/time-signature [4 4]}]}]]]}]}))
+                :actions (cond-> []
+                           (not (:activity/paused? activity)) (conj [:action/stop-metronome])
+                           :then
+                           (conj [:action/transact
+                                  [{:db/id (:db/id activity)
+                                    :metronome/bars
+                                    [{:ordered/idx (inc (apply max 0 (keep :ordered/idx (:metronome/bars activity))))
+                                      :music/time-signature [4 4]}]}]]))}]}))
 
 (defn prepare-metronome [activity]
   {:sections

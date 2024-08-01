@@ -136,22 +136,37 @@
     (is (= (-> (sut/prepare-bars
                 {:db/id 666
                  :music/tempo 90
-                 :metronome/bars [{:music/time-signature [4 4]}]})
+                 :metronome/bars [{:db/id 1
+                                   :music/time-signature [4 4]}]})
                :bars)
            [{:beats {:val 4}
              :subdivision {:val 4}
-             :dots [{} {} {} {}]}])))
+             :dots [{:actions [[:action/stop-metronome]
+                               [:action/db.add 1 :metronome/accentuate-beats 1]]}
+                    {:actions [[:action/stop-metronome]
+                               [:action/db.add 1 :metronome/accentuate-beats 2]]}
+                    {:actions [[:action/stop-metronome]
+                               [:action/db.add 1 :metronome/accentuate-beats 3]]}
+                    {:actions [[:action/stop-metronome]
+                               [:action/db.add 1 :metronome/accentuate-beats 4]]}]}])))
 
   (testing "Displays the bar time signature"
     (is (= (-> (sut/prepare-bars
                 {:db/id 666
                  :music/tempo 90
-                 :metronome/bars [{:music/time-signature [6 8]}]})
+                 :activity/paused? true
+                 :metronome/bars [{:db/id 2
+                                   :music/time-signature [6 8]}]})
                :bars
                first)
            {:beats {:val 6}
             :subdivision {:val 8}
-            :dots [{} {} {} {} {} {}]})))
+            :dots [{:actions [[:action/db.add 2 :metronome/accentuate-beats 1]]}
+                   {:actions [[:action/db.add 2 :metronome/accentuate-beats 2]]}
+                   {:actions [[:action/db.add 2 :metronome/accentuate-beats 3]]}
+                   {:actions [[:action/db.add 2 :metronome/accentuate-beats 4]]}
+                   {:actions [[:action/db.add 2 :metronome/accentuate-beats 5]]}
+                   {:actions [[:action/db.add 2 :metronome/accentuate-beats 6]]}]})))
 
   (testing "Displays the currently playing tempo of a bar with explicit tempo"
     (is (= (-> (sut/prepare-bars
@@ -172,35 +187,44 @@
     (is (= (-> (sut/prepare-bars
                 {:db/id 666
                  :music/tempo 120
-                 :metronome/bars [{:music/time-signature [4 4]
+                 :activity/paused? true
+                 :metronome/bars [{:db/id 3
+                                   :music/time-signature [4 4]
                                    :metronome/click-beats #{1 3}}]})
                :bars
                first
                :dots)
-           [{} {:disabled? true} {} {:disabled? true}])))
+           [{:actions [[:action/db.add 3 :metronome/accentuate-beats 1]]}
+            {:disabled? true
+             :actions [[:action/db.add 3 :metronome/click-beats 2]]}
+            {:actions [[:action/db.add 3 :metronome/accentuate-beats 3]]}
+            {:disabled? true
+             :actions [[:action/db.add 3 :metronome/click-beats 4]]}])))
 
   (testing "Accentuates some beats"
-    (is (= (-> (sut/prepare-bars
-                {:db/id 666
-                 :music/tempo 120
-                 :metronome/bars [{:music/time-signature [4 4]
-                                   :metronome/accentuate-beats #{1}}]})
-               :bars
-               first
-               :dots)
-           [{:highlight? true} {} {} {}])))
+    (is (= (->> (sut/prepare-bars
+                 {:db/id 666
+                  :music/tempo 120
+                  :metronome/bars [{:music/time-signature [4 4]
+                                    :metronome/accentuate-beats #{1}}]})
+                :bars
+                first
+                :dots
+                (map :highlight?))
+           [true nil nil nil])))
 
   (testing "Does not accentuate ignored beat"
-    (is (= (-> (sut/prepare-bars
-                {:db/id 666
-                 :music/tempo 120
-                 :metronome/bars [{:music/time-signature [4 4]
-                                   :metronome/click-beats #{2 4}
-                                   :metronome/accentuate-beats #{1}}]})
-               :bars
-               first
-               :dots)
-           [{:disabled? true} {} {:disabled? true} {}])))
+    (is (= (->> (sut/prepare-bars
+                 {:db/id 666
+                  :music/tempo 120
+                  :metronome/bars [{:music/time-signature [4 4]
+                                    :metronome/click-beats #{2 4}
+                                    :metronome/accentuate-beats #{1}}]})
+                :bars
+                first
+                :dots
+                (map :disabled?))
+           [true nil true nil])))
 
   (testing "Repeats bar"
     (is (= (-> (sut/prepare-bars
@@ -228,7 +252,24 @@
            [{:text "Remove bar"
              :icon :phosphor.regular/minus-circle
              :theme :warn
-             :actions [[:action/transact [[:db/retractEntity 1]]]]}])))
+             :actions [[:action/stop-metronome]
+                       [:action/transact [[:db/retractEntity 1]]]]}])))
+
+  (testing "Doesn't need to stop metronome when removing bars from paused metronome"
+    (is (= (->> (sut/prepare-bars
+                 {:db/id 666
+                  :music/tempo 120
+                  :activity/paused? true
+                  :metronome/bars [{:db/id 1
+                                    :music/time-signature [4 4]}
+                                   {:db/id 2
+                                    :music/time-signature [3 4]}]})
+                :bars
+                first
+                :buttons
+                first
+                :actions)
+           [[:action/transact [[:db/retractEntity 1]]]])))
 
   (testing "Includes button to add another bar"
     (is (= (->> (sut/prepare-bars
@@ -239,7 +280,8 @@
            [{:text "Add bar"
              :icon :phosphor.regular/music-notes-plus
              :icon-size :large
-             :actions [[:action/transact
+             :actions [[:action/stop-metronome]
+                       [:action/transact
                         [{:db/id 666
                           :metronome/bars [{:ordered/idx 1
                                             :music/time-signature [4 4]}]}]]]}])))
@@ -248,6 +290,7 @@
     (is (= (->> (sut/prepare-bars
                  {:db/id 666
                   :music/tempo 60
+                  :activity/paused? true
                   :metronome/bars [{:ordered/idx 2
                                     :music/time-signature [4 4]}]})
                 :buttons
