@@ -116,8 +116,11 @@
         {:class (dot-padding size)}
         (for [dot dots]
           [:div.rounded-full.transition.duration-300.border
-           {:class (concat
+           {:on {:click (:actions dot)}
+            :class (concat
                     (dot-size size)
+                    (when (:actions dot)
+                      ["cursor-pointer"])
                     (cond
                       (:current? dot)
                       ["bg-success" "border-success"]
