@@ -130,3 +130,130 @@
                 first
                 :actions)
            [[:action/stop-metronome]]))))
+
+(deftest prepare-bars-test
+  (testing "Prepares single default bar"
+    (is (= (-> (sut/prepare-bars
+                {:db/id 666
+                 :music/tempo 90
+                 :metronome/bars [{:music/time-signature [4 4]}]})
+               :bars)
+           [{:beats {:val 4}
+             :subdivision {:val 4}
+             :dots [{} {} {} {}]}])))
+
+  (testing "Displays the bar time signature"
+    (is (= (-> (sut/prepare-bars
+                {:db/id 666
+                 :music/tempo 90
+                 :metronome/bars [{:music/time-signature [6 8]}]})
+               :bars
+               first)
+           {:beats {:val 6}
+            :subdivision {:val 8}
+            :dots [{} {} {} {} {} {}]})))
+
+  (testing "Displays the currently playing tempo of a bar with explicit tempo"
+    (is (= (-> (sut/prepare-bars
+                {:db/id 666
+                 :metronome/bars [{:music/time-signature [4 4]
+                                   :music/tempo 120}
+                                  {:music/time-signature [3 4]
+                                   :music/tempo 60}]
+                 :music/tempo 90 ;; 75% of 120, so the bar @60bpm should play @45bpm
+                 })
+               :bars
+               second
+               :tempo)
+           {:val 45
+            :unit "BPM"})))
+
+  (testing "Does not click all beats"
+    (is (= (-> (sut/prepare-bars
+                {:db/id 666
+                 :music/tempo 120
+                 :metronome/bars [{:music/time-signature [4 4]
+                                   :metronome/click-beats #{1 3}}]})
+               :bars
+               first
+               :dots)
+           [{} {:disabled? true} {} {:disabled? true}])))
+
+  (testing "Accentuates some beats"
+    (is (= (-> (sut/prepare-bars
+                {:db/id 666
+                 :music/tempo 120
+                 :metronome/bars [{:music/time-signature [4 4]
+                                   :metronome/accentuate-beats #{1}}]})
+               :bars
+               first
+               :dots)
+           [{:highlight? true} {} {} {}])))
+
+  (testing "Does not accentuate ignored beat"
+    (is (= (-> (sut/prepare-bars
+                {:db/id 666
+                 :music/tempo 120
+                 :metronome/bars [{:music/time-signature [4 4]
+                                   :metronome/click-beats #{2 4}
+                                   :metronome/accentuate-beats #{1}}]})
+               :bars
+               first
+               :dots)
+           [{:disabled? true} {} {:disabled? true} {}])))
+
+  (testing "Repeats bar"
+    (is (= (-> (sut/prepare-bars
+                {:db/id 666
+                 :music/tempo 120
+                 :metronome/bars [{:music/time-signature [4 4]
+                                   :metronome/reps 2}]})
+               :bars
+               first
+               :reps)
+           {:val 2
+            :unit "times"})))
+
+  (testing "Includes button to remove bar when there are multiple bars"
+    (is (= (->> (sut/prepare-bars
+                 {:db/id 666
+                  :music/tempo 120
+                  :metronome/bars [{:db/id 1
+                                    :music/time-signature [4 4]}
+                                   {:db/id 2
+                                    :music/time-signature [3 4]}]})
+                :bars
+                first
+                :buttons)
+           [{:text "Remove bar"
+             :icon :phosphor.regular/minus-circle
+             :theme :warn
+             :actions [[:action/transact [[:db/retractEntity 1]]]]}])))
+
+  (testing "Includes button to add another bar"
+    (is (= (->> (sut/prepare-bars
+                 {:db/id 666
+                  :music/tempo 60
+                  :metronome/bars [{:music/time-signature [4 4]}]})
+                :buttons)
+           [{:text "Add bar"
+             :icon :phosphor.regular/music-notes-plus
+             :icon-size :large
+             :actions [[:action/transact
+                        [{:db/id 666
+                          :metronome/bars [{:ordered/idx 1
+                                            :music/time-signature [4 4]}]}]]]}])))
+
+  (testing "Deleting bars can leave holes - make sure new bars have idx at the end"
+    (is (= (->> (sut/prepare-bars
+                 {:db/id 666
+                  :music/tempo 60
+                  :metronome/bars [{:ordered/idx 2
+                                    :music/time-signature [4 4]}]})
+                :buttons
+                first
+                :actions)
+           [[:action/transact
+             [{:db/id 666
+               :metronome/bars [{:ordered/idx 3
+                                 :music/time-signature [4 4]}]}]]]))))

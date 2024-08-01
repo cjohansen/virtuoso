@@ -1,5 +1,6 @@
 (ns virtuoso.pages.metronome
-  (:require [phosphor.icons :as icons]))
+  (:require [phosphor.icons :as icons]
+            [virtuoso.metronome :as metronome]))
 
 (defn get-step-size [activity]
   (or (:metronome/tempo-step-size activity) 5))
@@ -53,6 +54,47 @@
    :text (str (:music/tempo activity))
    :label "BPM"
    :theme (if (:activity/paused? activity) :neutral :success)})
+
+(defn prepare-bar [activity bar paced-bar]
+  (let [[beats subdivision] (:music/time-signature bar)
+        beat-xs (range 1 (inc beats))
+        click-beat? (set (or (:metronome/click-beats bar) beat-xs))]
+    (cond-> {:beats {:val beats}
+             :subdivision {:val subdivision}
+             :dots (for [beat beat-xs]
+                     (let [click-it? (click-beat? beat)]
+                       (cond-> {}
+                         (not click-it?)
+                         (assoc :disabled? true)
+
+                         (and click-it? (contains? (:metronome/accentuate-beats bar) beat))
+                         (assoc :highlight? true))))}
+      (:music/tempo bar)
+      (assoc :tempo {:val (:music/tempo paced-bar)
+                     :unit "BPM"})
+
+      (< 1 (or (:metronome/reps bar) 1))
+      (assoc :reps {:val (:metronome/reps bar)
+                    :unit "times"})
+
+      (< 1 (count (:metronome/bars activity)))
+      (assoc :buttons [{:text "Remove bar"
+                        :icon (icons/icon :phosphor.regular/minus-circle)
+                        :theme :warn
+                        :actions [[:action/transact [[:db/retractEntity (:db/id bar)]]]]}]))))
+
+(defn prepare-bars [activity]
+  (let [paced-bars (metronome/set-tempo (:music/tempo activity) (:metronome/bars activity))]
+    {:kind :element.kind/bars
+     :bars (map #(prepare-bar activity %1 %2) (:metronome/bars activity) paced-bars)
+     :buttons [{:text "Add bar"
+                :icon (icons/icon :phosphor.regular/music-notes-plus)
+                :icon-size :large
+                :actions [[:action/transact
+                           [{:db/id (:db/id activity)
+                             :metronome/bars
+                             [{:ordered/idx (inc (apply max 0 (keep :ordered/idx (:metronome/bars activity))))
+                               :music/time-signature [4 4]}]}]]]}]}))
 
 (defn prepare-metronome [activity]
   {:sections

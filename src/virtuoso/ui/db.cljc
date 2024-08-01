@@ -6,7 +6,9 @@
 (defn connect []
   (d/create-conn
    (merge
-    {:music/tempo {} ;; number, bpm
+    {:ordered/idx {} ;; number, ordered collections
+
+     :music/tempo {} ;; number, bpm
      :music/time-signature {} ;; tuple of numbers [4 4]
 
      ;; set of numbers #{1}
@@ -15,6 +17,9 @@
      :metronome/click-beats {:db/cardinality :db.cardinality/many}
      ;; number, percentage of beats to randomly drop
      :metronome/drop-pct {}
+     ;; bars
+     :metronome/bars {:db/cardinality :db.cardinality/many
+                      :db/type :db.type/ref}
 
      :view/tool {:db/type :db.type/ref}
 
