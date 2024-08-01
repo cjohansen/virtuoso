@@ -9,6 +9,7 @@
             [virtuoso.elements.form-scenes]
             [virtuoso.elements.icon-button-scenes]
             [virtuoso.elements.layout-scenes]
+            [virtuoso.elements.metronome-scenes]
             [virtuoso.elements.typography-scenes]))
 
 :virtuoso.elements.bar-scenes/keep
@@ -19,6 +20,7 @@
 :virtuoso.elements.form-scenes/keep
 :virtuoso.elements.icon-button-scenes/keep
 :virtuoso.elements.layout-scenes/keep
+:virtuoso.elements.metronome-scenes/keep
 :virtuoso.elements.typography-scenes/keep
 
 (replicant/set-dispatch! #(prn %3))

@@ -99,4 +99,5 @@
 (defn prepare-metronome [activity]
   {:sections
    [(prepare-badge activity)
+    (prepare-bars activity)
     (prepare-button-panel activity)]})

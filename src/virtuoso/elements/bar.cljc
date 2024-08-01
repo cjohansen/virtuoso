@@ -132,7 +132,7 @@
                       ["bg-neutral" "border-neutral"]))}])])]))
 
 (defn bars [{:keys [bars buttons]}]
-  [:div.flex.gap-4
+  [:div.flex.gap-4.justify-center
    (map bar bars)
    (let [size (:size (first bars))
          size (if (sizes size) size :medium)]
