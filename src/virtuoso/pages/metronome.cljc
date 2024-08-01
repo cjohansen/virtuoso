@@ -38,18 +38,30 @@
 (defn get-activity [db]
   (:view/tool (d/entity db :virtuoso/current-view)))
 
+(defn alias-ks [m alias->k]
+  (loop [m m
+         alias->k (seq alias->k)]
+    (if (nil? alias->k)
+      m
+      (let [[alias k] (first alias->k)]
+        (recur (assoc m alias (get m k)) (next alias->k))))))
+
 (defn get-button-actions [activity]
-  (let [step-size (get-step-size activity)
-        space-actions (if (:activity/paused? activity)
-                        [[:action/db.retract activity :activity/paused?]
-                         (start-metronome activity)]
-                        (stop-metronome activity))]
-    {"p" (adjust-tempo activity (- step-size))
-     "-" (adjust-tempo activity (- 1))
-     "space" space-actions
-     " " space-actions
-     "+" (adjust-tempo activity 1)
-     "n" (adjust-tempo activity step-size)}))
+  (let [step-size (get-step-size activity)]
+    (alias-ks
+     {"p" (adjust-tempo activity (- step-size))
+      "-" (adjust-tempo activity (- 1))
+      "space" (if (:activity/paused? activity)
+                [[:action/db.retract activity :activity/paused?]
+                 (start-metronome activity)]
+                (stop-metronome activity))
+      "+" (adjust-tempo activity 1)
+      "n" (adjust-tempo activity step-size)}
+     {" " "space"
+      "ArrowUp" "+"
+      "ArrowDown" "-"
+      "ArrowRight" "n"
+      "ArrowLeft" "p"})))
 
 (defmethod actions/get-keypress-actions ::tool [db data e]
   (let [activity (get-activity db)]
