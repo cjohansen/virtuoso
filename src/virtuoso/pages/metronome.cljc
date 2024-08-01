@@ -113,7 +113,9 @@
                        {:highlight? true
                         :actions (into base-actions
                                        [[:action/db.retract (:db/id bar) :metronome/accentuate-beats beat]
-                                        [:action/db.retract (:db/id bar) :metronome/click-beats beat]])}
+                                        (if (:metronome/click-beats bar)
+                                          [:action/db.retract (:db/id bar) :metronome/click-beats beat]
+                                          [:action/transact [{:db/id (:db/id bar) :metronome/click-beats (set (remove #{beat} beat-xs))}]])])}
 
                        :else
                        {:actions (conj base-actions [:action/db.add (:db/id bar) :metronome/accentuate-beats beat])}))}

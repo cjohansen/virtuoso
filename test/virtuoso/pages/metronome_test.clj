@@ -248,6 +248,43 @@
                 (map :highlight?))
            [true nil nil nil])))
 
+  (testing "Clicking accentuated beat silences it"
+    (is (= (->> (sut/prepare-bars
+                 {:db/id 666
+                  :music/tempo 120
+                  :metronome/bars [{:db/id 2
+                                    :music/time-signature [4 4]
+                                    :metronome/accentuate-beats #{1}}]})
+                :bars
+                first
+                :dots
+                first
+                :actions
+                helper/simplify-db-actions)
+           [[:action/db.add {:db/id 666} :activity/paused? true]
+            [:action/stop-metronome]
+            [:action/db.retract 2 :metronome/accentuate-beats 1]
+            [:action/transact [{:db/id 2 :metronome/click-beats #{2 3 4}}]]])))
+
+  (testing "Clicking accentuated beat a second time also silences it"
+    (is (= (->> (sut/prepare-bars
+                 {:db/id 666
+                  :music/tempo 120
+                  :metronome/bars [{:db/id 2
+                                    :music/time-signature [4 4]
+                                    :metronome/click-beats #{1 2 3 4}
+                                    :metronome/accentuate-beats #{1}}]})
+                :bars
+                first
+                :dots
+                first
+                :actions
+                helper/simplify-db-actions)
+           [[:action/db.add {:db/id 666} :activity/paused? true]
+            [:action/stop-metronome]
+            [:action/db.retract 2 :metronome/accentuate-beats 1]
+            [:action/db.retract 2 :metronome/click-beats 1]])))
+
   (testing "Does not accentuate ignored beat"
     (is (= (->> (sut/prepare-bars
                  {:db/id 666
