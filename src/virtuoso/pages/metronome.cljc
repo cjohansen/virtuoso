@@ -1,6 +1,8 @@
 (ns virtuoso.pages.metronome
-  (:require [phosphor.icons :as icons]
-            [virtuoso.metronome :as metronome]))
+  (:require [datascript.core :as d]
+            [phosphor.icons :as icons]
+            [virtuoso.metronome :as metronome]
+            [virtuoso.ui.actions :as actions]))
 
 (def schema
   {:music/tempo {} ;; number, bpm
@@ -27,43 +29,58 @@
     [[:action/db.add activity :music/tempo target-tempo]
      (start-metronome activity target-tempo)]))
 
-(defn prepare-button-panel [activity]
+(defn get-activity [db]
+  (:view/tool (d/entity db :virtuoso/current-view)))
+
+(defn get-button-actions [activity]
   (let [step-size (get-step-size activity)]
+    {"p" (adjust-tempo activity (- step-size))
+     "-" (adjust-tempo activity (- 1))
+     "space" [(if (:activity/paused? activity)
+                (start-metronome activity)
+                [:action/stop-metronome])]
+     "+" (adjust-tempo activity 1)
+     "n" (adjust-tempo activity step-size)}))
+
+(defmethod actions/get-keypress-actions ::tool [db data e]
+  (let [activity (get-activity db)]
+    (when-not (:activity/paused? activity)
+      (when e
+        (.preventDefault e)
+        (.stopPropagation e))
+      (get (get-button-actions activity) (:key data)))))
+
+(defn prepare-button-panel [activity]
+  (let [actions (get-button-actions activity)
+        step-size (get-step-size activity)]
     {:kind :element.kind/button-panel
      :buttons
      (for [button [{:text (str "Lower tempo by " step-size " bpm")
                     :icon (icons/icon :phosphor.bold/minus)
                     :icon-size :tiny
                     :icon-after-label (str step-size)
-                    :actions (adjust-tempo activity (- step-size))
                     :kbd "p"}
                    {:text "Lower tempo"
                     :icon (icons/icon :phosphor.bold/minus)
-                    :actions (adjust-tempo activity (- 1))
                     :kbd "-"}
                    (if (:activity/paused? activity)
                      {:text "Play"
                       :icon (icons/icon :phosphor.fill/play)
-                      :actions [(start-metronome activity)]
                       :size :large
                       :kbd "space"}
                      {:text "Pause"
                       :icon (icons/icon :phosphor.fill/pause)
-                      :actions [[:action/stop-metronome]]
                       :size :large
                       :kbd "space"})
                    {:text "Bump tempo"
                     :icon (icons/icon :phosphor.bold/plus)
-                    :actions (adjust-tempo activity 1)
                     :kbd "+"}
                    {:text (str "Bump tempo by " step-size " bpm")
                     :icon (icons/icon :phosphor.bold/plus)
                     :icon-size :tiny
                     :icon-after-label (str step-size)
-                    :actions (adjust-tempo activity step-size)
                     :kbd "n"}]]
-       (cond-> button
-         (nil? (:actions button)) (assoc :disabled? true)))}))
+       (assoc button :actions (get actions (:kbd button))))}))
 
 (defn prepare-badge [activity]
   {:kind :element.kind/round-badge
