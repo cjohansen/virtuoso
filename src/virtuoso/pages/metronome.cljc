@@ -19,6 +19,7 @@
      :buttons
      (for [button [{:text (str "Lower tempo by " step-size " bpm")
                     :icon (icons/icon :phosphor.bold/minus)
+                    :icon-size :tiny
                     :icon-after-label (str step-size)
                     :actions (adjust-tempo activity (- step-size))
                     :kbd "p"}
@@ -43,6 +44,7 @@
                     :kbd "+"}
                    {:text (str "Bump tempo by " step-size " bpm")
                     :icon (icons/icon :phosphor.bold/plus)
+                    :icon-size :tiny
                     :icon-after-label (str step-size)
                     :actions (adjust-tempo activity step-size)
                     :kbd "n"}]]

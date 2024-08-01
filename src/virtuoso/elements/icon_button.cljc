@@ -2,14 +2,17 @@
   (:require [phosphor.icons :as icons]))
 
 (def button-icon-size
-  {:small {:small ["h-3" "w-3"]
+  {:small {:tiny ["h-2" "w-2"]
+           :small ["h-3" "w-3"]
            :medium ["h-4" "w-4"]
            :large ["h-6" "w-6"]}
-   :medium {:small ["h-4" "w-4"]
+   :medium {:tiny ["h-2.5" "w-2.5"]
+            :small ["h-4" "w-4"]
             :medium ["h-6" "w-6"]
             :large ["h-8" "w-8"]
             :xlarge ["h-10" "w-10"]}
-   :large {:small ["h-5" "w-5"]
+   :large {:tiny ["h-3" "w-3"]
+           :small ["h-5" "w-5"]
            :medium ["h-8" "w-8"]
            :large ["h-12" "w-12"]}})
 
@@ -33,7 +36,7 @@
               (theme-class theme)]
       :on {:click actions}}
      (if icon-after-label
-       [:div.flex.items-center.text-lg
+       [:div.flex.items-center.text-lg {:class "gap-0.5"}
         icon-el
         icon-after-label]
        icon-el)]))

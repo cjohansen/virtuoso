@@ -54,6 +54,7 @@
                 first)
            {:text "Lower tempo by 8 bpm"
             :icon :phosphor.bold/minus
+            :icon-size :tiny
             :icon-after-label "8"
             :kbd "p"
             :actions [[:action/db.add {:music/tempo 60
@@ -102,6 +103,7 @@
                 last)
            {:text "Bump tempo by 8 bpm"
             :icon :phosphor.bold/plus
+            :icon-size :tiny
             :icon-after-label "8"
             :kbd "n"
             :actions [[:action/db.add {:music/tempo 60

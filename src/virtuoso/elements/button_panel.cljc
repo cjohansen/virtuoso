@@ -6,7 +6,7 @@
    [:div.flex.items-center.gap-4.justify-center
     (map #(icon-button/icon-button
            (cond-> %
-             (not= :large (:size %))
+             (and (not= :large (:size %)) (not (:icon-size %)))
              (assoc :icon-size :small))) buttons)]
    (when-let [kbds (seq (keep :kbd buttons))]
      [:div.flex.items-center.gap-8.justify-center.mt-4.max-md:hidden
