@@ -138,7 +138,7 @@
          size (if (sizes size) size :medium)]
      (for [button buttons]
        [:div.flex.items-center {:style {:height (str (sizes size) "rem")}}
-        (icon-button/icon-button
+        (icon-button/bare-icon-button
          (-> button
              (assoc :size :small)
              (update :theme #(or % :success))))]))])
