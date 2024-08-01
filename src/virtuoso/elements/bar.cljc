@@ -60,11 +60,12 @@
          [:div {:style {:min-height (icon-size size)}}
           (icon-button button {:size size})]))]))
 
-(defn bar [{:keys [beats subdivision tempo reps dots size buttons]}]
+(defn bar [{:keys [beats subdivision tempo reps dots size buttons] :as bar}]
   (let [size (if (sizes size) size :medium)
         rem-size (sizes size)
         height (str rem-size "rem")]
-    [:div
+    [:div (when-let [k (:replicant/key bar)]
+            {:replicant/key k})
      [:div.relative.pl-4.pr-4.min-w-12.border-l-2.border-r-2.border-neutral.flex
       {:style {:height height}}
       (for [i (range 5)]

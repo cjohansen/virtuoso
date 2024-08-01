@@ -137,7 +137,8 @@
         beat-xs (range 1 (inc beats))
         click-beat? (set (or (:metronome/click-beats bar) beat-xs))
         base-actions (stop-metronome activity)]
-    (cond-> {:beats {:val beats}
+    (cond-> {:replicant/key [:bar (:db/id bar)]
+             :beats {:val beats}
              :subdivision {:val subdivision}
              :dots (for [beat beat-xs]
                      (cond

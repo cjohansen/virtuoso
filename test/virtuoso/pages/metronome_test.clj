@@ -170,7 +170,8 @@
                                    :music/time-signature [4 4]}]})
                :bars
                helper/simplify-db-actions)
-           [{:beats {:val 4}
+           [{:replicant/key [:bar 1]
+             :beats {:val 4}
              :subdivision {:val 4}
              :dots [{:actions [[:action/db.add {:db/id 666} :activity/paused? true]
                                [:action/stop-metronome]
@@ -194,7 +195,8 @@
                                    :music/time-signature [6 8]}]})
                :bars
                first)
-           {:beats {:val 6}
+           {:replicant/key [:bar 2]
+            :beats {:val 6}
             :subdivision {:val 8}
             :dots [{:actions [[:action/db.add 2 :metronome/accentuate-beats 1]]}
                    {:actions [[:action/db.add 2 :metronome/accentuate-beats 2]]}
