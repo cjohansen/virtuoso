@@ -24,31 +24,39 @@
 (defn start-metronome [activity & [tempo]]
   [:action/start-metronome (:metronome/bars activity) (or tempo (:music/tempo activity))])
 
+(defn stop-metronome [activity]
+  (when-not (:activity/paused? activity)
+    [[:action/db.add activity :activity/paused? true]
+     [:action/stop-metronome]]))
+
 (defn adjust-tempo [activity tempo-change]
   (let [target-tempo (+ (:music/tempo activity) tempo-change)]
-    [[:action/db.add activity :music/tempo target-tempo]
-     (start-metronome activity target-tempo)]))
+    (cond-> [[:action/db.add activity :music/tempo target-tempo]]
+      (not (:activity/paused? activity))
+      (conj (start-metronome activity target-tempo)))))
 
 (defn get-activity [db]
   (:view/tool (d/entity db :virtuoso/current-view)))
 
 (defn get-button-actions [activity]
-  (let [step-size (get-step-size activity)]
+  (let [step-size (get-step-size activity)
+        space-actions (if (:activity/paused? activity)
+                        [[:action/db.retract activity :activity/paused?]
+                         (start-metronome activity)]
+                        (stop-metronome activity))]
     {"p" (adjust-tempo activity (- step-size))
      "-" (adjust-tempo activity (- 1))
-     "space" [(if (:activity/paused? activity)
-                (start-metronome activity)
-                [:action/stop-metronome])]
+     "space" space-actions
+     " " space-actions
      "+" (adjust-tempo activity 1)
      "n" (adjust-tempo activity step-size)}))
 
 (defmethod actions/get-keypress-actions ::tool [db data e]
   (let [activity (get-activity db)]
-    (when-not (:activity/paused? activity)
-      (when e
-        (.preventDefault e)
-        (.stopPropagation e))
-      (get (get-button-actions activity) (:key data)))))
+    (when e
+      (.preventDefault e)
+      (.stopPropagation e))
+    (get (get-button-actions activity) (:key data))))
 
 (defn prepare-button-panel [activity]
   (let [actions (get-button-actions activity)
@@ -92,7 +100,7 @@
   (let [[beats subdivision] (:music/time-signature bar)
         beat-xs (range 1 (inc beats))
         click-beat? (set (or (:metronome/click-beats bar) beat-xs))
-        base-actions (if (:activity/paused? activity) [] [[:action/stop-metronome]])]
+        base-actions (stop-metronome activity)]
     (cond-> {:beats {:val beats}
              :subdivision {:val subdivision}
              :dots (for [beat beat-xs]
@@ -124,14 +132,16 @@
                         :actions (conj base-actions [:action/transact [[:db/retractEntity (:db/id bar)]]])}]))))
 
 (defn prepare-bars [activity]
-  (let [paced-bars (metronome/set-tempo (:music/tempo activity) (:metronome/bars activity))]
+  (let [paced-bars (metronome/set-tempo (:music/tempo activity) (map #(into {} %) (:metronome/bars activity)))]
     {:kind :element.kind/bars
      :bars (map #(prepare-bar activity %1 %2) (:metronome/bars activity) paced-bars)
      :buttons [{:text "Add bar"
                 :icon (icons/icon :phosphor.regular/music-notes-plus)
                 :icon-size :large
                 :actions (cond-> []
-                           (not (:activity/paused? activity)) (conj [:action/stop-metronome])
+                           (not (:activity/paused? activity))
+                           (into (stop-metronome activity))
+
                            :then
                            (conj [:action/transact
                                   [{:db/id (:db/id activity)

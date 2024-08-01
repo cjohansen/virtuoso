@@ -39,3 +39,13 @@
      (cond-> x
        (map? x) (select-keys (remove (comp nss namespace) (keys x)))))
    (e->map data)))
+
+(defn simplify-db-actions [data]
+  (walk/postwalk
+   (fn [x]
+     (cond-> x
+       (and (vector? x)
+            (#{:action/db.add :action/db.retract} (first x))
+            (map? (second x)))
+       (update-in [1] #(select-keys % [:db/id]))))
+   data))

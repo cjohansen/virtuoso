@@ -1,6 +1,7 @@
 (ns virtuoso.pages.metronome-test
   (:require [clojure.test :refer [deftest is testing]]
-            [virtuoso.pages.metronome :as sut]))
+            [virtuoso.pages.metronome :as sut]
+            [virtuoso.test-helper :as helper]))
 
 (deftest prepare-badge-test
   (testing "Displays current tempo"
@@ -53,6 +54,18 @@
                 :actions)
            [[:action/db.add {:music/tempo 60, :metronome/bars [{}]} :music/tempo 55]
             [:action/start-metronome [{}] 55]])))
+
+  (testing "Lowering by 5 bpm does not start paused metronome"
+    (is (= (->> (sut/prepare-button-panel
+                 {:music/tempo 60
+                  :activity/paused? true
+                  :metronome/bars [{}]})
+                :buttons
+                first
+                :actions)
+           [[:action/db.add {:music/tempo 60
+                             :activity/paused? true
+                             :metronome/bars [{}]} :music/tempo 55]])))
 
   (testing "Skips down by preferred step size"
     (is (= (->> (sut/prepare-button-panel
@@ -130,7 +143,10 @@
                 (drop 2)
                 first
                 :actions)
-           [[:action/start-metronome [{}] 95]])))
+           [[:action/db.retract {:music/tempo 95
+                                 :activity/paused? true
+                                 :metronome/bars [{}]} :activity/paused?]
+            [:action/start-metronome [{}] 95]])))
 
   (testing "Pause button stops metronome"
     (is (= (->> (sut/prepare-button-panel
@@ -140,7 +156,10 @@
                 (drop 2)
                 first
                 :actions)
-           [[:action/stop-metronome]]))))
+           [[:action/db.add {:music/tempo 90
+                             :metronome/bars [{}]}
+             :activity/paused? true]
+            [:action/stop-metronome]]))))
 
 (deftest prepare-bars-test
   (testing "Prepares single default bar"
@@ -149,16 +168,21 @@
                  :music/tempo 90
                  :metronome/bars [{:db/id 1
                                    :music/time-signature [4 4]}]})
-               :bars)
+               :bars
+               helper/simplify-db-actions)
            [{:beats {:val 4}
              :subdivision {:val 4}
-             :dots [{:actions [[:action/stop-metronome]
+             :dots [{:actions [[:action/db.add {:db/id 666} :activity/paused? true]
+                               [:action/stop-metronome]
                                [:action/db.add 1 :metronome/accentuate-beats 1]]}
-                    {:actions [[:action/stop-metronome]
+                    {:actions [[:action/db.add {:db/id 666} :activity/paused? true]
+                               [:action/stop-metronome]
                                [:action/db.add 1 :metronome/accentuate-beats 2]]}
-                    {:actions [[:action/stop-metronome]
+                    {:actions [[:action/db.add {:db/id 666} :activity/paused? true]
+                               [:action/stop-metronome]
                                [:action/db.add 1 :metronome/accentuate-beats 3]]}
-                    {:actions [[:action/stop-metronome]
+                    {:actions [[:action/db.add {:db/id 666} :activity/paused? true]
+                               [:action/stop-metronome]
                                [:action/db.add 1 :metronome/accentuate-beats 4]]}]}])))
 
   (testing "Displays the bar time signature"
@@ -259,11 +283,13 @@
                                     :music/time-signature [3 4]}]})
                 :bars
                 first
-                :buttons)
+                :buttons
+                helper/simplify-db-actions)
            [{:text "Remove bar"
              :icon :phosphor.regular/minus-circle
              :theme :warn
-             :actions [[:action/stop-metronome]
+             :actions [[:action/db.add {:db/id 666} :activity/paused? true]
+                       [:action/stop-metronome]
                        [:action/transact [[:db/retractEntity 1]]]]}])))
 
   (testing "Doesn't need to stop metronome when removing bars from paused metronome"
@@ -287,11 +313,13 @@
                  {:db/id 666
                   :music/tempo 60
                   :metronome/bars [{:music/time-signature [4 4]}]})
-                :buttons)
+                :buttons
+                helper/simplify-db-actions)
            [{:text "Add bar"
              :icon :phosphor.regular/music-notes-plus
              :icon-size :large
-             :actions [[:action/stop-metronome]
+             :actions [[:action/db.add {:db/id 666} :activity/paused? true]
+                       [:action/stop-metronome]
                        [:action/transact
                         [{:db/id 666
                           :metronome/bars [{:ordered/idx 1
