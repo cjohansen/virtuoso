@@ -1,8 +1,32 @@
 (ns virtuoso.pages.metronome
   (:require [datascript.core :as d]
             [phosphor.icons :as icons]
+            [virtuoso.elements.layout :as layout]
+            [virtuoso.elements.typography :as t]
             [virtuoso.metronome :as metronome]
             [virtuoso.ui.actions :as actions]))
+
+(defn render-page [_ctx _page]
+  (layout/layout
+   [:div.flex.flex-col.min-h-screen.justify-between
+    (layout/header {:title "Metronome"})
+    [:main.grow.flex.flex-col.gap-4.replicant-root.justify-center
+     {:class layout/container-classes
+      :data-view "metronome"}]
+    [:footer.my-4 {:class layout/container-classes}
+     [:div.px-4.md:px-0.mt-4
+      (t/h2 "Help")
+      (t/p
+       "To change time signature, click the bar indicating the time signature,
+       and make your changes. To accentuate certain beats, click the
+       corresponding dot under the bar. Clicking it again will disable clicking
+       at this beat.")
+      (t/p
+       "The metronome supports both tempo and time signature changes. To use
+       them, click the notes with a plus next to the bar to add another bar.
+       Bars can have varying tempos, time signatures, and may repeat. The tempo
+       will be recalculated appropriately when stepping the metronome tempo up
+       and down.")]]]))
 
 (def schema
   {:music/tempo {} ;; number, bpm
@@ -168,3 +192,20 @@
    [(prepare-badge activity)
     (prepare-bars activity)
     (prepare-button-panel activity)]})
+
+(defn prepare-ui-data [db]
+  (prepare-metronome (get-activity db)))
+
+(defn get-settings [settings]
+  {:activity/paused? true
+   :music/tempo (or (:music/tempo settings) 60)
+   :metronome/drop-pct (or (:metronome/drop-pct settings) 0)
+   :metronome/tempo-step-size (or (:metronome/tempo-step-size settings) 5)
+   :metronome/bars (or (:metronome/bars settings) [{:music/time-signature [4 4]}])})
+
+(defn get-boot-actions [db]
+  [[:action/transact
+    [{:db/ident :virtuoso/current-view
+      :action/keypress-handler ::tool
+      :view/tool (into {:db/ident ::tool}
+                       (get-settings (d/entity db ::tool)))}]]])

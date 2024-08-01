@@ -7,5 +7,10 @@
   :page/kind :page.kind/interleaved-clickup
   :open-graph/description "A specialized metronome to help you solidify and speed up music you're practicing."
   :open-graph/image "/brain.svg"}
+ {:page/uri "/metronome/"
+  :page/title "Metronome"
+  :page/kind :page.kind/metronome
+  :open-graph/description "A highly customizable metronome with tempo and time signature changes and more."
+  :open-graph/image "/brain.svg"}
  {:page/uri "/404/"
   :page/kind :page.kind/not-found}]

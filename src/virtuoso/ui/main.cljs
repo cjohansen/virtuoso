@@ -3,6 +3,7 @@
             [virtuoso.elements.page :as page]
             [virtuoso.metronome :as metronome]
             [virtuoso.pages.interleaved-clickup :as icu-page]
+            [virtuoso.pages.metronome :as metronome-page]
             [virtuoso.ui.actions :as actions]
             [virtuoso.ui.db :as db]))
 
@@ -42,7 +43,10 @@
   (doseq [el roots]
     (case (.getAttribute el "data-view")
       "interleaved-clickup"
-      (prepare-and-render el db icu-page/prepare-ui-data page/page))))
+      (prepare-and-render el db icu-page/prepare-ui-data page/page)
+
+      "metronome"
+      (prepare-and-render el db metronome-page/prepare-ui-data page/page))))
 
 (defn execute-actions [conn actions]
   (some->> actions
@@ -53,7 +57,10 @@
   (doseq [el roots]
     (case (.getAttribute el "data-view")
       "interleaved-clickup"
-      (execute-actions conn (icu-page/get-boot-actions @conn)))))
+      (execute-actions conn (icu-page/get-boot-actions @conn))
+
+      "metronome"
+      (execute-actions conn (metronome-page/get-boot-actions @conn)))))
 
 (defn get-roots []
   (seq (js/document.querySelectorAll ".replicant-root")))
