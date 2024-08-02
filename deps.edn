@@ -6,7 +6,7 @@
         no.cjohansen/powerpack {:git/url "https://github.com/cjohansen/powerpack"
                                 :sha "34b53859d878aabc95a0bb86e143fa8a439f7e0d"}
         no.cjohansen/replicant {:git/url "https://github.com/cjohansen/replicant"
-                                :sha "403a2487d58c2ce8fc46c12066e5f6c2b7af9add"}}
+                                :sha "5122f06daeb087c122b768270e6c68c6f53806ae"}}
  :aliases
  {:dev {:extra-paths ["dev" "test" "dev-resources" "portfolio"]
         :extra-deps {cider/piggieback {:mvn/version "0.5.3"}

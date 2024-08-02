@@ -102,7 +102,7 @@
   (swap! store assoc :reloaded-at (.getTime (js/Date.))))
 
 (defn process-event [conn event data]
-  (execute-actions conn (actions/interpolate-event-data event data)))
+  (execute-actions conn (actions/interpolate-event-data (:replicant/js-event event) data)))
 
 (defn boot []
   (replicant/set-dispatch! #(process-event conn %2 %3))
