@@ -2,6 +2,7 @@
   (:require [datascript.core :as d]
             [phosphor.icons :as icons]
             [virtuoso.elements.layout :as layout]
+            [virtuoso.elements.modal :as modal]
             [virtuoso.elements.typography :as t]
             [virtuoso.metronome :as metronome]
             [virtuoso.ui.actions :as actions]))
@@ -175,16 +176,23 @@
      :buttons [{:text "Add bar"
                 :icon (icons/icon :phosphor.regular/music-notes-plus)
                 :icon-size :large
-                :actions (cond-> []
-                           (not (:activity/paused? activity))
-                           (into (stop-metronome activity))
+                :actions (let [idx (inc (apply max 0 (keep :ordered/idx (:music/bars activity))))]
+                           (cond-> []
+                             (not (:activity/paused? activity))
+                             (into (stop-metronome activity))
 
-                           :then
-                           (conj [:action/transact
-                                  [{:db/id (:db/id activity)
-                                    :music/bars
-                                    [{:ordered/idx (inc (apply max 0 (keep :ordered/idx (:music/bars activity))))
-                                      :music/time-signature [4 4]}]}]]))}]}))
+                             :then
+                             (conj [:action/transact
+                                    [{:db/id (:db/id activity)
+                                      :music/bars
+                                      [{:ordered/idx idx
+                                        :music/time-signature [4 4]}]}]])
+
+                             :finally
+                             (into (modal/get-open-modal-actions
+                                    (d/entity-db activity)
+                                    ::edit-bar-modal
+                                    {:idx idx}))))}]}))
 
 (defn prepare-metronome [activity]
   {:sections
@@ -194,6 +202,9 @@
 
 (defn prepare-ui-data [db]
   (prepare-metronome (get-activity db)))
+
+(defn prepare-modal-data [db]
+  {:title "Yessir"})
 
 (defn get-settings [settings]
   {:activity/paused? true

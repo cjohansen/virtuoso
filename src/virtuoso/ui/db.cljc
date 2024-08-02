@@ -1,8 +1,9 @@
 (ns virtuoso.ui.db
   (:require [datascript.core :as d]
+            [virtuoso.elements.modal :as modal]
             [virtuoso.pages.interleaved-clickup :as icu]
-            [virtuoso.ui.actions :as actions]
-            [virtuoso.pages.metronome :as metronome]))
+            [virtuoso.pages.metronome :as metronome]
+            [virtuoso.ui.actions :as actions]))
 
 (defn connect []
   (d/create-conn
@@ -12,6 +13,7 @@
      :view/tool {:db/type :db.type/ref}
      }
     metronome/schema
+    modal/schema
     icu/schema)))
 
 (defmethod actions/execute-side-effect! ::transact [conn {:keys [args]}]
