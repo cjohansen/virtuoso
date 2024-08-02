@@ -12,6 +12,17 @@
 (defonce metronome (metronome/create-metronome))
 (def ^:dynamic *on-render* nil)
 
+(def features
+  {"interleaved-clickup"
+   {:feature/prepare icu-page/prepare-ui-data
+    :feature/render page/page
+    :feature/get-boot-actions icu-page/get-boot-actions}
+
+   "metronome"
+   {:feature/prepare metronome-page/prepare-ui-data
+    :feature/render page/page
+    :feature/get-boot-actions metronome-page/get-boot-actions}})
+
 (defmethod actions/execute-side-effect! ::start-metronome [_ {:keys [args]}]
   (let [[activity] args
         drop-pct (:metronome/drop-pct activity)
@@ -34,22 +45,17 @@
 (defmethod actions/perform-action :action/stop-metronome [_ _ _]
   [{:kind ::stop-metronome}])
 
-(defn prepare-and-render [el db prepare render-f]
+(defn prepare-and-render [el db {:feature/keys [prepare render]}]
   (let [page-data (prepare db)]
     (when (ifn? *on-render*)
       (*on-render* page-data))
     (some->> page-data
-             render-f
+             render
              (replicant/render el))))
 
 (defn render [db roots]
   (doseq [el roots]
-    (case (.getAttribute el "data-view")
-      "interleaved-clickup"
-      (prepare-and-render el db icu-page/prepare-ui-data page/page)
-
-      "metronome"
-      (prepare-and-render el db metronome-page/prepare-ui-data page/page))))
+    (prepare-and-render el db (get features (.getAttribute el "data-view")))))
 
 (defn execute-actions [conn actions]
   (some->> actions
@@ -58,12 +64,8 @@
 
 (defn boot-roots [conn roots]
   (doseq [el roots]
-    (case (.getAttribute el "data-view")
-      "interleaved-clickup"
-      (execute-actions conn (icu-page/get-boot-actions @conn))
-
-      "metronome"
-      (execute-actions conn (metronome-page/get-boot-actions @conn)))))
+    (when-let [get-boot-actions (get-in features [(.getAttribute el "data-view") :feature/get-boot-actions])]
+      (execute-actions conn (get-boot-actions @conn)))))
 
 (defn get-roots []
   (seq (js/document.querySelectorAll ".replicant-root")))
