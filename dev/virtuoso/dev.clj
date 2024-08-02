@@ -13,5 +13,6 @@
 
 (comment ;; s-:
   (dev/start)
+  (dev/stop)
   (dev/reset)
   )
