@@ -121,9 +121,6 @@
 (defmethod actions/get-keypress-actions ::tool [db data e]
   (let [activity (get-activity db)]
     (when (started? activity)
-      (when e
-        (.preventDefault e)
-        (.stopPropagation e))
       (case (:key data)
         "+" (increase-tempo activity)
         "-" (decrease-tempo activity)

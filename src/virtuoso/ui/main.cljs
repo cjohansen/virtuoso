@@ -114,5 +114,8 @@
    "keydown"
    (fn [e]
      (when (= js/document.body (.-target e))
-       (execute-actions conn (actions/get-keypress-actions @conn {:key (.-key e)} e)))))
+       (when-let [actions (actions/get-keypress-actions @conn {:key (.-key e)} e)]
+         (.preventDefault e)
+         (.stopPropagation e)
+         (execute-actions conn actions)))))
   (swap! store assoc :booted-at (.getTime (js/Date.))))

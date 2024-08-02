@@ -88,11 +88,9 @@
       "ArrowLeft" "p"})))
 
 (defmethod actions/get-keypress-actions ::tool [db data e]
-  (let [activity (get-activity db)]
-    (when e
-      (.preventDefault e)
-      (.stopPropagation e))
-    (get (get-button-actions activity) (:key data))))
+  (-> (get-activity db)
+      get-button-actions
+      (get (:key data))))
 
 (defn prepare-button-panel [activity]
   (let [actions (get-button-actions activity)
