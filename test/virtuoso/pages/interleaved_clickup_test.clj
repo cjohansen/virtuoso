@@ -28,8 +28,8 @@
                 first
                 (helper/strip-keys-by-ns #{"db" "virtuoso.interleaved-clickup"}))
            [:action/start-metronome
-            {:metronome/bars [{:metronome/accentuate-beats #{1}
-                               :metronome/drop-pct 0
-                               :metronome/click-beats #{1 4 3 2}
-                               :music/time-signature [4 4]}]
+            {:music/bars [{:metronome/accentuate-beats #{1}
+                           :metronome/drop-pct 0
+                           :metronome/click-beats #{1 4 3 2}
+                           :music/time-signature [4 4]}]
              :music/tempo 75}]))))

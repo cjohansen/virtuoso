@@ -16,7 +16,7 @@
   (let [[activity] args
         drop-pct (:metronome/drop-pct activity)
         tempo (:music/tempo activity)]
-    (cond->> (:metronome/bars activity)
+    (cond->> (:music/bars activity)
       drop-pct (metronome/set-default :metronome/drop-pct drop-pct)
       :always metronome/click-beats
       :always metronome/accentuate-beats

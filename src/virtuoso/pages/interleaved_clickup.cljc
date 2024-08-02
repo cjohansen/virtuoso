@@ -68,14 +68,14 @@
   (when-not (:activity/paused? activity)
     (when-let [tempo (icu/decrease-tempo activity)]
       [[:action/db.add activity ::icu/tempo-current tempo]
-       [:action/start-metronome {:metronome/bars [activity]
+       [:action/start-metronome {:music/bars [activity]
                                  :music/tempo tempo}]])))
 
 (defn increase-tempo [activity]
   (when-not (:activity/paused? activity)
     (let [tempo (icu/increase-tempo activity)]
       [[:action/db.add activity ::icu/tempo-current tempo]
-       [:action/start-metronome {:metronome/bars [activity]
+       [:action/start-metronome {:music/bars [activity]
                                  :music/tempo tempo}]])))
 
 (defn change-phrase [activity next-phrase]
@@ -85,7 +85,7 @@
         [[:action/transact
           [[:db/add (:db/id activity) ::icu/tempo-current tempo]
            [:db/add (:db/id activity) ::icu/phrase-current next-phrase]]]
-         [:action/start-metronome {:metronome/bars [activity]
+         [:action/start-metronome {:music/bars [activity]
                                    :music/tempo tempo}]]))))
 
 (defn forward-phrase [activity]
@@ -112,7 +112,7 @@
 (defn play [activity]
   (when (:activity/paused? activity)
     [[:action/db.add activity :activity/paused? false]
-     [:action/start-metronome {:metronome/bars [activity]
+     [:action/start-metronome {:music/bars [activity]
                                :music/tempo (icu/get-tempo activity)}]]))
 
 (defn get-activity [db]
@@ -211,7 +211,7 @@
                            [{:db/id (:db/id activity)
                              ::icu/tempo-current tempo
                              ::icu/phrase-current (icu/get-next-phrase activity)}]]
-                          [:action/start-metronome {:metronome/bars [activity]
+                          [:action/start-metronome {:music/bars [activity]
                                                     :music/tempo tempo}]])}
      :boxes
      [{:title "Exercise details"

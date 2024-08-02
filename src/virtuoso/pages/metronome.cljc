@@ -39,8 +39,8 @@
    ;; number, percentage of beats to randomly drop
    :metronome/drop-pct {}
    ;; bars
-   :metronome/bars {:db/cardinality :db.cardinality/many
-                    :db/type :db.type/ref}})
+   :music/bars {:db/cardinality :db.cardinality/many
+                :db/type :db.type/ref}})
 
 (defn get-step-size [activity]
   (or (:metronome/tempo-step-size activity) 5))
@@ -164,16 +164,16 @@
       (assoc :reps {:val (:metronome/reps bar)
                     :unit "times"})
 
-      (< 1 (count (:metronome/bars activity)))
+      (< 1 (count (:music/bars activity)))
       (assoc :buttons [{:text "Remove bar"
                         :icon (icons/icon :phosphor.regular/minus-circle)
                         :theme :warn
                         :actions (conj base-actions [:action/transact [[:db/retractEntity (:db/id bar)]]])}]))))
 
 (defn prepare-bars [activity]
-  (let [paced-bars (metronome/set-tempo (:music/tempo activity) (map #(into {} %) (:metronome/bars activity)))]
+  (let [paced-bars (metronome/set-tempo (:music/tempo activity) (map #(into {} %) (:music/bars activity)))]
     {:kind :element.kind/bars
-     :bars (map #(prepare-bar activity %1 %2) (:metronome/bars activity) paced-bars)
+     :bars (map #(prepare-bar activity %1 %2) (:music/bars activity) paced-bars)
      :buttons [{:text "Add bar"
                 :icon (icons/icon :phosphor.regular/music-notes-plus)
                 :icon-size :large
@@ -184,8 +184,8 @@
                            :then
                            (conj [:action/transact
                                   [{:db/id (:db/id activity)
-                                    :metronome/bars
-                                    [{:ordered/idx (inc (apply max 0 (keep :ordered/idx (:metronome/bars activity))))
+                                    :music/bars
+                                    [{:ordered/idx (inc (apply max 0 (keep :ordered/idx (:music/bars activity))))
                                       :music/time-signature [4 4]}]}]]))}]}))
 
 (defn prepare-metronome [activity]
@@ -202,7 +202,7 @@
    :music/tempo (or (:music/tempo settings) 60)
    :metronome/drop-pct (or (:metronome/drop-pct settings) 0)
    :metronome/tempo-step-size (or (:metronome/tempo-step-size settings) 5)
-   :metronome/bars (or (:metronome/bars settings) [{:music/time-signature [4 4]}])})
+   :music/bars (or (:music/bars settings) [{:music/time-signature [4 4]}])})
 
 (defn get-boot-actions [db]
   [[:action/transact
