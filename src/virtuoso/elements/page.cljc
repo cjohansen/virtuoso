@@ -27,3 +27,7 @@
        :element.kind/footer (footer section)
        :element.kind/round-badge (badge/round-badge section)
        (prn "Unknown section kind" section)))])
+
+(defn modal [props]
+  [:modal
+   [:h1 "Whatchagonna do"]])

@@ -1,5 +1,6 @@
 (ns ^:figwheel-hooks virtuoso.ui.main
-  (:require [replicant.dom :as replicant]
+  (:require [datascript.core :as d]
+            [replicant.dom :as replicant]
             [virtuoso.elements.page :as page]
             [virtuoso.metronome :as metronome]
             [virtuoso.pages.interleaved-clickup :as icu-page]
@@ -45,13 +46,33 @@
 (defmethod actions/perform-action :action/stop-metronome [_ _ _]
   [{:kind ::stop-metronome}])
 
-(defn prepare-and-render [el db {:feature/keys [prepare render]}]
-  (let [page-data (prepare db)]
+(defn get-current-modal [db]
+  (some->> (d/q '[:find ?e ?idx
+                  :where
+                  [?e :modal/layer-idx ?idx]]
+                db)
+           (sort-by second)
+           ffirst
+           (d/entity db)))
+
+(defn prepare-and-render-ui [el db k prepare render & data]
+  (let [page-data (apply prepare db data)]
     (when (ifn? *on-render*)
-      (*on-render* page-data))
+      (*on-render* k page-data))
     (some->> page-data
              render
              (replicant/render el))))
+
+(defn prepare-and-render [el db {:feature/keys [prepare render prepare-modal render-modal]}]
+  (let [ui-el (.-firstChild el)
+        modal-el (.-nextSibling ui-el)]
+    (if-let [modal (when prepare-modal (get-current-modal db))]
+      (do
+        (when-not (.-firstChild ui-el)
+          ;; Render UI at least once, so it displays under the modal
+          (prepare-and-render-ui ui-el db ::ui-layer prepare (or render page/page)))
+        (prepare-and-render-ui modal-el db ::modal-layer prepare-modal (or render-modal page/modal) modal))
+      (prepare-and-render-ui ui-el db ::ui-layer prepare (or render page/page)))))
 
 (defn render [db roots]
   (doseq [el roots]
@@ -62,8 +83,15 @@
            (actions/perform-actions @conn)
            (actions/execute! conn)))
 
+(defn add-class [el class]
+  (.add (.-classList el) class))
+
 (defn boot-roots [conn roots]
   (doseq [el roots]
+    (.appendChild el (doto (js/document.createElement "div")
+                       (add-class "ui-layer")))
+    (.appendChild el (doto (js/document.createElement "div")
+                       (add-class "modal-layer")))
     (when-let [get-boot-actions (get-in features [(.getAttribute el "data-view") :feature/get-boot-actions])]
       (execute-actions conn (get-boot-actions @conn)))))
 
