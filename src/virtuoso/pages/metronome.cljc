@@ -46,7 +46,7 @@
   (or (:metronome/tempo-step-size activity) 5))
 
 (defn start-metronome [activity & [tempo]]
-  [:action/start-metronome (:metronome/bars activity) (or tempo (:music/tempo activity))])
+  [:action/start-metronome (update (into {} activity) :music/tempo #(or tempo %))])
 
 (defn stop-metronome [activity]
   (when-not (:activity/paused? activity)

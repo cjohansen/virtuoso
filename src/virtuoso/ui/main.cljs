@@ -13,8 +13,11 @@
 (def ^:dynamic *on-render* nil)
 
 (defmethod actions/execute-side-effect! ::start-metronome [_ {:keys [args]}]
-  (let [[bars tempo] args]
-    (cond->> bars
+  (let [[activity] args
+        drop-pct (:metronome/drop-pct activity)
+        tempo (:music/tempo activity)]
+    (cond->> (:metronome/bars activity)
+      drop-pct (metronome/set-default :metronome/drop-pct drop-pct)
       :always metronome/click-beats
       :always metronome/accentuate-beats
       tempo (metronome/set-tempo tempo)

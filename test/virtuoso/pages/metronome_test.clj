@@ -53,7 +53,8 @@
                 first
                 :actions)
            [[:action/db.add {:music/tempo 60, :metronome/bars [{}]} :music/tempo 55]
-            [:action/start-metronome [{}] 55]])))
+            [:action/start-metronome {:metronome/bars [{}]
+                                      :music/tempo 55}]])))
 
   (testing "Lowering by 5 bpm does not start paused metronome"
     (is (= (->> (sut/prepare-button-panel
@@ -83,7 +84,9 @@
                                        :metronome/tempo-step-size 8
                                        :metronome/bars [{}]}
                        :music/tempo 52]
-                      [:action/start-metronome [{}] 52]]})))
+                      [:action/start-metronome {:metronome/bars [{}]
+                                                :metronome/tempo-step-size 8
+                                                :music/tempo 52}]]})))
 
   (testing "Lowers tempo by a single bpm"
     (is (= (->> (sut/prepare-button-panel
@@ -93,7 +96,8 @@
                 second
                 :actions)
            [[:action/db.add {:music/tempo 120, :metronome/bars [{}]} :music/tempo 119]
-            [:action/start-metronome [{}] 119]])))
+            [:action/start-metronome {:metronome/bars [{}]
+                                      :music/tempo 119}]])))
 
   (testing "Bumps tempo by a single bpm"
     (is (= (->> (sut/prepare-button-panel
@@ -104,7 +108,8 @@
                 first
                 :actions)
            [[:action/db.add {:music/tempo 120, :metronome/bars [{}]} :music/tempo 121]
-            [:action/start-metronome [{}] 121]])))
+            [:action/start-metronome {:metronome/bars [{}]
+                                      :music/tempo 121}]])))
 
   (testing "Defaults to skip increasing by 5 bpm"
     (is (= (->> (sut/prepare-button-panel
@@ -114,7 +119,8 @@
                 last
                 :actions)
            [[:action/db.add {:music/tempo 60, :metronome/bars [{}]} :music/tempo 65]
-            [:action/start-metronome [{}] 65]])))
+            [:action/start-metronome {:metronome/bars [{}]
+                                      :music/tempo 65}]])))
 
   (testing "Skips up by preferred step size"
     (is (= (->> (sut/prepare-button-panel
@@ -132,7 +138,9 @@
                                        :metronome/tempo-step-size 8
                                        :metronome/bars [{}]}
                        :music/tempo 68]
-                      [:action/start-metronome [{}] 68]]})))
+                      [:action/start-metronome {:music/tempo 68
+                                                :metronome/tempo-step-size 8
+                                                :metronome/bars [{}]}]]})))
 
   (testing "Play button starts metronome"
     (is (= (->> (sut/prepare-button-panel
@@ -146,7 +154,9 @@
            [[:action/db.retract {:music/tempo 95
                                  :activity/paused? true
                                  :metronome/bars [{}]} :activity/paused?]
-            [:action/start-metronome [{}] 95]])))
+            [:action/start-metronome {:music/tempo 95
+                                      :activity/paused? true
+                                      :metronome/bars [{}]}]])))
 
   (testing "Pause button stops metronome"
     (is (= (->> (sut/prepare-button-panel

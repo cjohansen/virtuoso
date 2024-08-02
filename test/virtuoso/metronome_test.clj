@@ -224,3 +224,21 @@
                               {:music/time-signature [6 8]}])
            [{:music/time-signature [4 4] :music/tempo 80}
             {:music/time-signature [6 8] :music/tempo 80}]))))
+
+(deftest set-default-test
+  (testing "Applies metronome-wide settings on bars"
+    (is (= (sut/set-default :metronome/drop-pct 0.3 [{:music/time-signature [4 4]}
+                                                     {:music/time-signature [6 8]}])
+           [{:music/time-signature [4 4]
+             :metronome/drop-pct 0.3}
+            {:music/time-signature [6 8]
+             :metronome/drop-pct 0.3}])))
+
+  (testing "Keeps bar-specific overrides"
+    (is (= (sut/set-default :metronome/drop-pct 0.3 [{:music/time-signature [4 4]}
+                                                     {:music/time-signature [6 8]
+                                                      :metronome/drop-pct 0.25}])
+           [{:music/time-signature [4 4]
+             :metronome/drop-pct 0.3}
+            {:music/time-signature [6 8]
+             :metronome/drop-pct 0.25}]))))

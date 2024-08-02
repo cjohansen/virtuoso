@@ -178,6 +178,10 @@
            (conj res (assoc bar :music/tempo (* scale bar-tempo)))
            bar-tempo))))))
 
+(defn set-default [k v bars]
+  (for [bar bars]
+    (update (into {} bar) k #(or % v))))
+
 (defn accentuate-beats
   "Converts `:metronome/accentuate-beats` on bars to an `:accentuate?` function."
   [bars]
