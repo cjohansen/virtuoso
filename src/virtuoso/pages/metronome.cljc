@@ -169,7 +169,7 @@
                         :theme :warn
                         :actions (conj base-actions [:action/transact [[:db/retractEntity (:db/id bar)]]])}]))))
 
-(defn prepare-bars [activity]
+(defn prepare-bars [db activity]
   (let [paced-bars (metronome/set-tempo (:music/tempo activity) (map #(into {} %) (:music/bars activity)))]
     {:kind :element.kind/bars
      :bars (map #(prepare-bar activity %1 %2) (:music/bars activity) paced-bars)
@@ -188,20 +188,17 @@
                                       [{:ordered/idx idx
                                         :music/time-signature [4 4]}]}]])
 
-                             :finally
-                             (into (modal/get-open-modal-actions
-                                    (d/entity-db activity)
-                                    ::edit-bar-modal
-                                    {:idx idx}))))}]}))
+                             db
+                             (into (modal/get-open-modal-actions db ::edit-bar-modal {:idx idx}))))}]}))
 
-(defn prepare-metronome [activity]
+(defn prepare-metronome [db activity]
   {:sections
    [(prepare-badge activity)
-    (prepare-bars activity)
+    (prepare-bars db activity)
     (prepare-button-panel activity)]})
 
 (defn prepare-ui-data [db]
-  (prepare-metronome (get-activity db)))
+  (prepare-metronome db (get-activity db)))
 
 (defn prepare-modal-data [db]
   {:title "Yessir"})

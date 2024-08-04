@@ -174,6 +174,7 @@
 (deftest prepare-bars-test
   (testing "Prepares single default bar"
     (is (= (-> (sut/prepare-bars
+                nil
                 {:db/id 666
                  :music/tempo 90
                  :music/bars [{:db/id 1
@@ -198,6 +199,7 @@
 
   (testing "Displays the bar time signature"
     (is (= (-> (sut/prepare-bars
+                nil
                 {:db/id 666
                  :music/tempo 90
                  :activity/paused? true
@@ -217,6 +219,7 @@
 
   (testing "Displays the currently playing tempo of a bar with explicit tempo"
     (is (= (-> (sut/prepare-bars
+                nil
                 {:db/id 666
                  :music/bars [{:music/time-signature [4 4]
                                :music/tempo 120}
@@ -232,6 +235,7 @@
 
   (testing "Does not click all beats"
     (is (= (-> (sut/prepare-bars
+                nil
                 {:db/id 666
                  :music/tempo 120
                  :activity/paused? true
@@ -250,6 +254,7 @@
 
   (testing "Accentuates some beats"
     (is (= (->> (sut/prepare-bars
+                 nil
                  {:db/id 666
                   :music/tempo 120
                   :music/bars [{:music/time-signature [4 4]
@@ -262,6 +267,7 @@
 
   (testing "Clicking accentuated beat silences it"
     (is (= (->> (sut/prepare-bars
+                 nil
                  {:db/id 666
                   :music/tempo 120
                   :music/bars [{:db/id 2
@@ -280,6 +286,7 @@
 
   (testing "Clicking accentuated beat a second time also silences it"
     (is (= (->> (sut/prepare-bars
+                 nil
                  {:db/id 666
                   :music/tempo 120
                   :music/bars [{:db/id 2
@@ -299,6 +306,7 @@
 
   (testing "Does not accentuate ignored beat"
     (is (= (->> (sut/prepare-bars
+                 nil
                  {:db/id 666
                   :music/tempo 120
                   :music/bars [{:music/time-signature [4 4]
@@ -312,6 +320,7 @@
 
   (testing "Repeats bar"
     (is (= (-> (sut/prepare-bars
+                nil
                 {:db/id 666
                  :music/tempo 120
                  :music/bars [{:music/time-signature [4 4]
@@ -324,6 +333,7 @@
 
   (testing "Includes button to remove bar when there are multiple bars"
     (is (= (->> (sut/prepare-bars
+                 nil
                  {:db/id 666
                   :music/tempo 120
                   :music/bars [{:db/id 1
@@ -343,6 +353,7 @@
 
   (testing "Doesn't need to stop metronome when removing bars from paused metronome"
     (is (= (->> (sut/prepare-bars
+                 nil
                  {:db/id 666
                   :music/tempo 120
                   :activity/paused? true
@@ -359,6 +370,7 @@
 
   (testing "Includes button to add another bar"
     (is (= (->> (sut/prepare-bars
+                 nil
                  {:db/id 666
                   :music/tempo 60
                   :music/bars [{:music/time-signature [4 4]}]})
@@ -376,6 +388,7 @@
 
   (testing "Deleting bars can leave holes - make sure new bars have idx at the end"
     (is (= (->> (sut/prepare-bars
+                 nil
                  {:db/id 666
                   :music/tempo 60
                   :activity/paused? true
