@@ -80,17 +80,18 @@
       (render-time-signature-buttons [beats subdivision] :right-button {:height height :size size})
       ;; Tempo
       (when tempo
-        [:div.pl-2.relative.flex.flex-col.text-center.justify-center.text-neutral-content
-         (if (:actions tempo)
-           (form/number-input
-            {:on {:input (:actions tempo)}
-             :value (:val tempo)
-             :class (cond-> ["mb-1" (rep-text-size size) "w-14"]
-                      (:default? tempo) (conj "text-neutral"))})
-           [:div {:class (rep-text-size size)} (:val tempo)])
-         [:div {:class (cond-> [(tempo-label-size size)]
-                         (:default? tempo) (conj "text-neutral"))}
-          (:unit tempo)]])
+        (let [subtle? (= :subtle (:style tempo))]
+          [:div.pl-2.relative.flex.flex-col.text-center.justify-center.text-neutral-content
+           (if (:actions tempo)
+             (form/number-input
+              {:on {:input (:actions tempo)}
+               :value (:val tempo)
+               :class (cond-> ["mb-1" (rep-text-size size) "w-14"]
+                        subtle? (conj "text-neutral"))})
+             [:div {:class (rep-text-size size)} (:val tempo)])
+           [:div {:class (cond-> [(tempo-label-size size)]
+                           subtle? (conj "text-neutral"))}
+            (:unit tempo)]]))
       ;; Reps
       (when reps
         [:div.relative.flex.ml-4

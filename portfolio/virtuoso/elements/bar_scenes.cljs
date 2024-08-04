@@ -140,7 +140,7 @@
                           :actions []}
            :button-below {:icon (icons/icon :phosphor.regular/plus-circle)
                           :actions []}}
-    :tempo {:val 70 :unit "BPM" :actions [] :default? true}
+    :tempo {:val 70 :unit "BPM" :actions [] :style :subtle}
     :dots [{:highlight? true} {} {} {}]
     :size :large}))
 
