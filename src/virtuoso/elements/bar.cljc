@@ -16,8 +16,8 @@
    :large "w-1"})
 
 (def rep-dot
-  {:medium "w-1 h-1"
-   :large "w-2 h-2"})
+  {:medium ["w-1" "h-1"]
+   :large ["w-2" "h-2"]})
 
 (def rep-text-size
   {:medium "text-sm"
