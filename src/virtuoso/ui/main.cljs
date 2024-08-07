@@ -51,20 +51,26 @@
   (let [page-data (apply prepare db data)]
     (when (ifn? *on-render*)
       (*on-render* k page-data))
-    (some->> page-data
-             render
-             (replicant/render el))))
+    (->> page-data
+         render
+         (replicant/render el))))
 
 (defn prepare-and-render [el db {:feature/keys [prepare render prepare-modal render-modal]}]
   (let [ui-el (.-firstChild el)
-        modal-el (.-nextSibling ui-el)]
+        modal-el (.-nextSibling ui-el)
+        render-page (or render page/page)
+        render-modal (or render-modal modal/render)]
     (if-let [modal (when prepare-modal (modal/get-current-modal db))]
       (do
         (when-not (.-firstChild ui-el)
           ;; Render UI at least once, so it displays under the modal
-          (prepare-and-render-ui ui-el db ::ui-layer prepare (or render page/page)))
-        (prepare-and-render-ui modal-el db ::modal-layer prepare-modal (or render-modal modal/render) modal))
-      (prepare-and-render-ui ui-el db ::ui-layer prepare (or render page/page)))))
+          (prepare-and-render-ui ui-el db ::ui-layer prepare render-page))
+        (prepare-and-render-ui modal-el db ::modal-layer prepare-modal render-modal modal))
+      (do
+        (when (.-firstChild modal-el)
+          ;; Unmount existing modal
+          (prepare-and-render-ui modal-el db ::modal-layer (constantly nil) render-modal nil))
+        (prepare-and-render-ui ui-el db ::ui-layer prepare render-page)))))
 
 (defn render [db roots]
   (doseq [el roots]
