@@ -64,7 +64,7 @@
          [:div {:style {:min-height (icon-size size)}}
           (icon-button button {:size size})]))]))
 
-(defn bar [{:keys [beats subdivision tempo reps dots size buttons] :as bar}]
+(defn bar [{:keys [beats subdivision tempo reps dots size buttons actions] :as bar}]
   (let [size (if (sizes size) size :medium)
         rem-size (sizes size)
         height (str rem-size "rem")]
@@ -77,8 +77,10 @@
       ;; Time signature
       (render-time-signature-buttons [beats subdivision] :left-button {:height height :size size})
       [:div.text-center.relative.leading-none.flex.flex-col.justify-around.pr-2
-       {:style {:height height}
-        :class [(label-width size) (text-class size)]}
+       (cond-> {:style {:height height}
+                :class [(label-width size) (text-class size)]}
+         actions (assoc :on {:click actions})
+         actions (update :class conj "cursor-pointer"))
        [:div (:val beats)]
        [:div (:val subdivision)]]
       (render-time-signature-buttons [beats subdivision] :right-button {:height height :size size})
