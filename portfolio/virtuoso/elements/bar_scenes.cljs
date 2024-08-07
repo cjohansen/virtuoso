@@ -84,24 +84,46 @@
     :dots [{:highlight? true} {} {} {}]}))
 
 (defscene editable-big-bar
-  (bar/bar
-   {:beats {:val 4
-            :left-button {:icon (icons/icon :phosphor.regular/minus-circle)
-                          :actions []}
-            :right-button {:icon (icons/icon :phosphor.regular/plus-circle)
+  "When the bar is editable we want labels to always occupy the same amount of
+  space, to avoid things moving around when using the plus and minus buttons
+  etc."
+  [:div.flex.flex-col.gap-8
+   (bar/bar
+    {:beats {:val 4
+             :left-button {:icon (icons/icon :phosphor.regular/minus-circle)
+                           :actions []}
+             :right-button {:icon (icons/icon :phosphor.regular/plus-circle)
+                            :actions []}}
+     :subdivision {:val 4
+                   :left-button {:icon (icons/icon :phosphor.regular/minus-circle)}
+                   :right-button {:icon (icons/icon :phosphor.regular/plus-circle)
+                                  :actions []}}
+     :reps {:val 1
+            :unit "time"
+            :button-above {:icon (icons/icon :phosphor.regular/minus-circle)}
+            :button-below {:icon (icons/icon :phosphor.regular/plus-circle)
                            :actions []}}
-    :subdivision {:val 4
-                  :left-button {:icon (icons/icon :phosphor.regular/minus-circle)}
-                  :right-button {:icon (icons/icon :phosphor.regular/plus-circle)
-                                 :actions []}}
-    :reps {:val 1
-           :unit "time"
-           :button-above {:icon (icons/icon :phosphor.regular/minus-circle)}
-           :button-below {:icon (icons/icon :phosphor.regular/plus-circle)
-                          :actions []}}
-    :tempo {:val 70 :unit "BPM" :actions []}
-    :dots [{:highlight? true} {} {} {}]
-    :size :large}))
+     :tempo {:val 70 :unit "BPM" :actions []}
+     :dots [{:highlight? true} {} {} {}]
+     :size :large})
+   (bar/bar
+    {:beats {:val 9
+             :left-button {:icon (icons/icon :phosphor.regular/minus-circle)
+                           :actions []}
+             :right-button {:icon (icons/icon :phosphor.regular/plus-circle)
+                            :actions []}}
+     :subdivision {:val 16
+                   :left-button {:icon (icons/icon :phosphor.regular/minus-circle)}
+                   :right-button {:icon (icons/icon :phosphor.regular/plus-circle)
+                                  :actions []}}
+     :reps {:val 12
+            :unit "times"
+            :button-above {:icon (icons/icon :phosphor.regular/minus-circle)}
+            :button-below {:icon (icons/icon :phosphor.regular/plus-circle)
+                           :actions []}}
+     :tempo {:val 190 :unit "BPM" :actions []}
+     :dots [{:highlight? true} {} {} {}]
+     :size :large})])
 
 (defscene editable-bar-without-tempo
   (bar/bar

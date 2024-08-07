@@ -43,6 +43,10 @@
   {:medium ["w-3" "h-3"]
    :large ["w-5" "h-5"]})
 
+(def label-width
+  {:medium "min-w-4"
+   :large "min-w-20"})
+
 (defn icon-button [{:keys [icon actions]} {:keys [size]}]
   (when icon
     [:button {:on-click actions
@@ -74,7 +78,7 @@
       (render-time-signature-buttons [beats subdivision] :left-button {:height height :size size})
       [:div.text-center.relative.leading-none.flex.flex-col.justify-around.pr-2
        {:style {:height height}
-        :class (text-class size)}
+        :class [(label-width size) (text-class size)]}
        [:div (:val beats)]
        [:div (:val subdivision)]]
       (render-time-signature-buttons [beats subdivision] :right-button {:height height :size size})
@@ -105,7 +109,8 @@
       (when reps
         [:div.pl-2.relative.flex.flex-col.justify-around.items-start
          (icon-button (:button-above reps) {:size size})
-         [:span {:class (rep-text-size size)} (:val reps) " " (:unit reps)]
+         [:span {:class [(label-width size) (rep-text-size size)]}
+          (:val reps) " " (:unit reps)]
          (icon-button (:button-below reps) {:size size})])
       ;; Buttons
       (when (seq buttons)
