@@ -33,6 +33,13 @@
     (coll? x) (map e->map x)
     :else x))
 
+(defn strip-keys [data ks]
+  (walk/postwalk
+   (fn [x]
+     (cond-> x
+       (map? x) (select-keys (remove ks (keys x)))))
+   (e->map data)))
+
 (defn strip-keys-by-ns [nss data]
   (walk/postwalk
    (fn [x]

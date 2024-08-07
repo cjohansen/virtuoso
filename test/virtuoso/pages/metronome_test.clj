@@ -401,3 +401,321 @@
              [{:db/id 666
                :music/bars [{:ordered/idx 3
                              :music/time-signature [4 4]}]}]]]))))
+
+(deftest prepare-modal-data-test
+  (testing "Prepares for editing new bar in modal"
+    (is (= (-> (sut/prepare-new-bar-modal
+                {:db/id 567
+                 :music/tempo 60
+                 :music/bars [{:db/id 1
+                               :ordered/idx 0
+                               :music/time-signature [4 4]}
+                              {:db/id 9
+                               :ordered/idx 1}]}
+                {:modal/kind ::sut/edit-new-bar-modal
+                 :modal/params {:idx 1}})
+               helper/simplify-db-actions)
+           {:title "Configure bar"
+            :classes ["max-w-64"]
+            :sections
+            [{:kind :element.kind/bars
+              :bars [{:beats {:val 4
+                              :left-button {:icon :phosphor.regular/minus-circle
+                                            :actions [[:action/db.add {:db/id 9} :music/time-signature [3 4]]]}
+                              :right-button {:icon :phosphor.regular/plus-circle
+                                             :actions [[:action/db.add {:db/id 9} :music/time-signature [5 4]]]}}
+                      :subdivision {:val 4
+                                    :left-button {:icon :phosphor.regular/minus-circle}
+                                    :right-button {:icon :phosphor.regular/plus-circle
+                                                   :actions [[:action/db.add {:db/id 9} :music/time-signature [4 8]]]}}
+                      :reps {:val 1
+                             :unit "time"
+                             :button-above {:icon :phosphor.regular/minus-circle}
+                             :button-below {:icon :phosphor.regular/plus-circle
+                                            :actions [[:action/db.add {:db/id 9} :metronome/reps 2]]}}
+                      :tempo {:val 60
+                              :unit "BPM"
+                              :actions [[:action/db.add {:db/id 1} :music/tempo 60]
+                                        [:action/db.add {:db/id 9} :music/tempo :event/target-value-num]]
+                              :subtle? true}
+                      :dots [{:actions
+                              [[:action/db.add {:db/id 567} :activity/paused? true]
+                               [:action/stop-metronome]
+                               [:action/db.add 9 :metronome/accentuate-beats 1]]}
+                             {:actions
+                              [[:action/db.add {:db/id 567} :activity/paused? true]
+                               [:action/stop-metronome]
+                               [:action/db.add 9 :metronome/accentuate-beats 2]]}
+                             {:actions
+                              [[:action/db.add {:db/id 567} :activity/paused? true]
+                               [:action/stop-metronome]
+                               [:action/db.add 9 :metronome/accentuate-beats 3]]}
+                             {:actions
+                              [[:action/db.add {:db/id 567} :activity/paused? true]
+                               [:action/stop-metronome]
+                               [:action/db.add 9 :metronome/accentuate-beats 4]]}]
+                      :size :large}]}]})))
+
+  (testing "Initializes time signature in new bar from the previous bar"
+    (is (= (-> (sut/prepare-new-bar-modal
+                {:music/tempo 60
+                 :music/bars [{:db/id 1
+                               :ordered/idx 0
+                               :music/time-signature [3 4]}
+                              {:db/id 9
+                               :ordered/idx 1}]}
+                {:modal/kind ::sut/edit-new-bar-modal
+                 :modal/params {:idx 1}})
+               helper/simplify-db-actions
+               :sections
+               first
+               :bars
+               first
+               (select-keys [:beats :subdivision])
+               (helper/strip-keys #{:icon}))
+           {:beats {:val 3
+                    :left-button {:actions [[:action/db.add {:db/id 9} :music/time-signature [2 4]]]}
+                    :right-button {:actions [[:action/db.add {:db/id 9} :music/time-signature [4 4]]]}}
+            :subdivision {:val 4
+                          :left-button {}
+                          :right-button {:actions [[:action/db.add {:db/id 9} :music/time-signature [3 8]]]}}})))
+
+  (testing "Cannot have less than 1 beat in a bar"
+    (is (= (-> (sut/prepare-new-bar-modal
+                {:music/tempo 60
+                 :music/bars [{:db/id 1
+                               :ordered/idx 0
+                               :music/time-signature [4 4]}
+                              {:db/id 9
+                               :ordered/idx 1
+                               :music/time-signature [1 4]}]}
+                {:modal/kind ::sut/edit-new-bar-modal
+                 :modal/params {:idx 1}})
+               helper/simplify-db-actions
+               :sections
+               first
+               :bars
+               first
+               :beats)
+           {:val 1
+            :left-button {:icon :phosphor.regular/minus-circle}
+            :right-button
+            {:icon :phosphor.regular/plus-circle
+             :actions [[:action/db.add {:db/id 9} :music/time-signature [2 4]]]}})))
+
+  (testing "Can change subdivisions up and down"
+    (is (= (-> (sut/prepare-new-bar-modal
+                {:music/tempo 60
+                 :music/bars [{:db/id 1
+                               :ordered/idx 0
+                               :music/time-signature [6 8]}
+                              {:db/id 9
+                               :ordered/idx 1}]}
+                {:modal/kind ::sut/edit-new-bar-modal
+                 :modal/params {:idx 1}})
+               helper/simplify-db-actions
+               :sections
+               first
+               :bars
+               first
+               :subdivision
+               (helper/strip-keys #{:icon}))
+           {:val 8
+            :left-button
+            {:actions [[:action/db.add {:db/id 9} :music/time-signature [6 4]]]}
+            :right-button
+            {:actions [[:action/db.add {:db/id 9} :music/time-signature [6 16]]]}})))
+
+  (testing "64ths is the end of the line"
+    (is (= (-> (sut/prepare-new-bar-modal
+                {:music/tempo 60
+                 :music/bars [{:db/id 1
+                               :ordered/idx 0
+                               :music/time-signature [32 64]}
+                              {:db/id 9
+                               :ordered/idx 1}]}
+                {:modal/kind ::sut/edit-new-bar-modal
+                 :modal/params {:idx 1}})
+               helper/simplify-db-actions
+               :sections
+               first
+               :bars
+               first
+               :subdivision
+               :right-button)
+           {:icon :phosphor.regular/plus-circle})))
+
+  (testing "Does not initialize new bar with reps from previous bar"
+    (is (= (-> (sut/prepare-new-bar-modal
+                {:music/tempo 60
+                 :music/bars [{:db/id 1
+                               :ordered/idx 0
+                               :metronome/reps 2
+                               :music/time-signature [3 4]}
+                              {:db/id 9
+                               :ordered/idx 1}]}
+                {:modal/kind ::sut/edit-new-bar-modal
+                 :modal/params {:idx 1}})
+               helper/simplify-db-actions
+               :sections
+               first
+               :bars
+               first
+               :reps
+               :val)
+           1)))
+
+  (testing "Can decrease reps when more than 1"
+    (is (= (-> (sut/prepare-new-bar-modal
+                {:music/tempo 60
+                 :music/bars [{:db/id 1
+                               :ordered/idx 0
+                               :music/time-signature [4 4]}
+                              {:db/id 8
+                               :ordered/idx 1
+                               :metronome/reps 2}]}
+                {:modal/kind ::sut/edit-new-bar-modal
+                 :modal/params {:idx 1}})
+               helper/simplify-db-actions
+               :sections
+               first
+               :bars
+               first
+               :reps
+               helper/simplify-db-actions)
+           {:val 2
+            :unit "times"
+            :button-above {:icon :phosphor.regular/minus-circle
+                           :actions [[:action/db.add {:db/id 8} :metronome/reps 1]]}
+            :button-below {:icon :phosphor.regular/plus-circle
+                           :actions [[:action/db.add {:db/id 8} :metronome/reps 3]]}})))
+
+  (testing "Displays metronome tempo as default tempo"
+    (is (= (-> (sut/prepare-new-bar-modal
+                {:music/tempo 80
+                 :music/bars [{:db/id 1
+                               :ordered/idx 0
+                               :music/time-signature [4 4]}
+                              {:db/id 8
+                               :ordered/idx 1}]}
+                {:modal/kind ::sut/edit-new-bar-modal
+                 :modal/params {:idx 1}})
+               helper/simplify-db-actions
+               :sections
+               first
+               :bars
+               first
+               :tempo
+               (dissoc :actions))
+           {:val 80
+            :unit "BPM"
+            :subtle? true})))
+
+  (testing "Setting the tempo reifies any existing default tempos"
+    (is (= (-> (sut/prepare-new-bar-modal
+                {:music/tempo 80
+                 :music/bars [{:db/id 1
+                               :ordered/idx 0
+                               :music/time-signature [4 4]}
+                              {:db/id 8
+                               :ordered/idx 1}]}
+                {:modal/kind ::sut/edit-new-bar-modal
+                 :modal/params {:idx 1}})
+               helper/simplify-db-actions
+               :sections
+               first
+               :bars
+               first
+               :tempo
+               :actions)
+           [[:action/db.add {:db/id 1} :music/tempo 80]
+            [:action/db.add {:db/id 8} :music/tempo :event/target-value-num]])))
+
+  (testing "Displays explicitly set tempo as edited"
+    (is (= (-> (sut/prepare-new-bar-modal
+                {:music/tempo 80
+                 :music/bars [{:db/id 1
+                               :ordered/idx 0
+                               :music/time-signature [4 4]}
+                              {:db/id 8
+                               :music/tempo 120
+                               :ordered/idx 1}]}
+                {:modal/kind ::sut/edit-new-bar-modal
+                 :modal/params {:idx 1}})
+               helper/simplify-db-actions
+               :sections
+               first
+               :bars
+               first
+               :tempo)
+           {:val 120
+            :unit "BPM"
+            :actions [[:action/db.add {:db/id 1} :music/tempo 80]
+                      [:action/db.add {:db/id 8} :music/tempo :event/target-value-num]]})))
+
+  (testing "Prepares for editing existing bar in modal"
+    (is (= (-> (sut/prepare-existing-bar-edit-modal
+                {:db/id 567
+                 :music/tempo 60
+                 :music/bars [{:db/id 1
+                               :ordered/idx 0
+                               :music/time-signature [4 4]}
+                              {:db/id 9
+                               :ordered/idx 1}]}
+                {:modal/kind ::sut/edit-bar-modal
+                 :modal/params {:idx 0}})
+               helper/simplify-db-actions)
+           {:title "Configure bar"
+            :classes ["max-w-64"]
+            :sections
+            [{:kind :element.kind/bars
+              :bars
+              [{:beats {:val 4
+                        :left-button {:icon :phosphor.regular/minus-circle
+                                      :actions [[:action/db.add {:db/id 1} :music/time-signature [3 4]]]}
+                        :right-button {:icon :phosphor.regular/plus-circle
+                                       :actions [[:action/db.add {:db/id 1} :music/time-signature [5 4]]]}}
+                :subdivision {:val 4
+                              :left-button {:icon :phosphor.regular/minus-circle}
+                              :right-button {:icon :phosphor.regular/plus-circle
+                                             :actions [[:action/db.add {:db/id 1} :music/time-signature [4 8]]]}}
+                :reps {:val 1
+                       :unit "time"
+                       :button-above {:icon :phosphor.regular/minus-circle}
+                       :button-below {:icon :phosphor.regular/plus-circle
+                                      :actions [[:action/db.add {:db/id 1} :metronome/reps 2]]}}
+                :tempo {:val 60
+                        :unit "BPM"
+                        :actions [[:action/db.add {:db/id 9} :music/tempo 60]
+                                  [:action/db.add {:db/id 1} :music/tempo :event/target-value-num]]
+                        :subtle? true}
+                :dots [{:actions [[:action/db.add {:db/id 567} :activity/paused? true]
+                                  [:action/stop-metronome]
+                                  [:action/db.add 1 :metronome/accentuate-beats 1]]}
+                       {:actions [[:action/db.add {:db/id 567} :activity/paused? true]
+                                  [:action/stop-metronome]
+                                  [:action/db.add 1 :metronome/accentuate-beats 2]]}
+                       {:actions [[:action/db.add {:db/id 567} :activity/paused? true]
+                                  [:action/stop-metronome]
+                                  [:action/db.add 1 :metronome/accentuate-beats 3]]}
+                       {:actions [[:action/db.add {:db/id 567} :activity/paused? true]
+                                  [:action/stop-metronome]
+                                  [:action/db.add 1 :metronome/accentuate-beats 4]]}]
+                :size :large}]}]})))
+
+  (testing "Can't set tempo or repeats on only bar"
+    (is (= (-> (sut/prepare-existing-bar-edit-modal
+                {:db/id 567
+                 :music/tempo 60
+                 :music/bars [{:db/id 1
+                               :ordered/idx 0
+                               :music/time-signature [4 4]}]}
+                {:modal/kind ::sut/edit-bar-modal
+                 :modal/params {:idx 0}})
+               helper/simplify-db-actions
+               :sections
+               first
+               :bars
+               first
+               (select-keys [:tempo :reps]))
+           {}))))
