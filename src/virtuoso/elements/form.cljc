@@ -48,7 +48,7 @@
   [(if (:href attrs)
      :a.block
      :div)
-   (update attrs :class str " p-3 md:p-5 " layout/box-classes)
+   (update attrs :class concat ["p-3" "md:p-5"] layout/box-classes)
    content])
 
 (defn h2

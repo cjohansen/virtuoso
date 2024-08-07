@@ -10,7 +10,7 @@
    (when spinner?
      [:span.loading.loading-spinner])
    (when left-icon
-     (icons/render left-icon {:class "h-6 w-6"}))
+     (icons/render left-icon {:class ["h-6" "w-6"]}))
    text
    (when right-icon
-     (icons/render right-icon {:class "h-6 w-6"}))])
+     (icons/render right-icon {:class ["h-6" "w-6"]}))])

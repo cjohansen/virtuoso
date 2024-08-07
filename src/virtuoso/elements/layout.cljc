@@ -17,13 +17,13 @@
 (def container-classes
   "container max-w-2xl mx-auto px-2 md:px-4")
 
-(def box-classes "bg-base-100 rounded-box border-base-300 md:border")
+(def box-classes ["bg-base-100" "rounded-box" "border-base-300" "md:border"])
 
 (defn box [attrs & content]
   [(if (:href attrs)
      :a.block
      :div)
-   (update attrs :class str " p-4 md:p-6 " box-classes)
+   (update attrs :class concat ["p-4" "md:p-6"] box-classes)
    content])
 
 (defn header [{:keys [title]}]
