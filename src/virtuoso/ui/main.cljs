@@ -1,5 +1,6 @@
 (ns ^:figwheel-hooks virtuoso.ui.main
-  (:require [replicant.dom :as replicant]
+  (:require [datascript.core :as d]
+            [replicant.dom :as replicant]
             [virtuoso.elements.modal :as modal]
             [virtuoso.elements.page :as page]
             [virtuoso.metronome :as metronome]
@@ -38,6 +39,12 @@
 
 (defmethod actions/execute-side-effect! ::stop-metronome [_ _]
   (metronome/stop metronome))
+
+(defmethod actions/execute-side-effect! ::db/transact [conn {:keys [args]}]
+  (try
+    (d/transact conn args)
+    (catch :default e
+      (throw (ex-info "Failed to transact data" {:tx-data args} e)))))
 
 (defmethod actions/perform-action :action/start-metronome [_ _ args]
   (let [[options tempo] args]

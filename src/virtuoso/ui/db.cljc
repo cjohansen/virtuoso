@@ -16,13 +16,6 @@
     modal/schema
     icu/schema)))
 
-(defmethod actions/execute-side-effect! ::transact [conn {:keys [args]}]
-  (try
-    (d/transact conn args)
-    (catch #?(:clj Exception
-              :cljs :default) e
-      (throw (ex-info "Failed to transact data" {:tx-data args} e)))))
-
 (defn get-eid [e]
   (or (:db/id e) e))
 
