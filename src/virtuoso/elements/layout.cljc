@@ -19,7 +19,7 @@
 
 (def box-classes ["bg-base-100" "rounded-box" "border-base-300" "md:border"])
 
-(defn box [attrs & content]
+(defn ^{:indent 1} box [attrs & content]
   [(if (:href attrs)
      :a.block
      :div)

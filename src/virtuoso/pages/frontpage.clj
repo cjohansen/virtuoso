@@ -10,13 +10,13 @@
      [:p.my-6.opacity-80
       "Tools for musicians to practice more efficiently."]
      (layout/box {:href "/interleaved-clickup/"}
-                 [:h2.mb-2 [:strong.font-bold "Interleaved Clicking Up"]]
-                 [:p.opacity-80 "Solidify and bring a piece of music up to speed by leveraging random
+       [:h2.mb-2 [:strong.font-bold "Interleaved Clicking Up"]]
+       [:p.opacity-80 "Solidify and bring a piece of music up to speed by leveraging random
     practice while clicking up with the metronome."])
      (layout/box {:href "/metronome/"
                   :class ["mt-4"]}
-                 [:h2.mb-2 [:strong.font-bold "Metronome"]]
-                 [:p.opacity-80 "A metronome that supports randomly dropping
+       [:h2.mb-2 [:strong.font-bold "Metronome"]]
+       [:p.opacity-80 "A metronome that supports randomly dropping
                  beats, accenting beats, changing time signatures and tempos and
                  more."])]
     [:footer
