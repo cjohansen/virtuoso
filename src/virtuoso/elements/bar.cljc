@@ -49,7 +49,7 @@
 
 (defn icon-button [{:keys [icon actions]} {:keys [size]}]
   (when icon
-    [:button {:on-click actions
+    [:button {:on {:click actions}
               :class (when-not actions
                        "text-neutral")
               :disabled (not actions)}
