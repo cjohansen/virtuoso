@@ -174,7 +174,8 @@
                                        [:action/transact [[:db/retractEntity (:db/id bar)]]])}])
 
       db
-      (assoc :actions (modal/get-open-modal-actions db ::edit-bar-modal {:idx (:ordered/idx bar)})))))
+      (assoc :actions (concat (modal/get-open-modal-actions db ::edit-bar-modal {:idx (:ordered/idx bar)})
+                              (stop-metronome activity))))))
 
 (defn prepare-bars [db activity]
   (let [paced-bars (metronome/set-tempo (:music/tempo activity) (map #(into {} %) (:music/bars activity)))]
@@ -196,7 +197,10 @@
                                         :music/time-signature [4 4]}]}]])
 
                              db
-                             (into (modal/get-open-modal-actions db ::edit-new-bar-modal {:idx idx}))))}]}))
+                             (into (modal/get-open-modal-actions db ::edit-new-bar-modal {:idx idx}))
+
+                             db
+                             (into (stop-metronome activity))))}]}))
 
 (defn prepare-metronome [db activity]
   {:sections
