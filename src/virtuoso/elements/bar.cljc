@@ -88,6 +88,10 @@
       (when tempo
         (let [subtle? (= :subtle (:style tempo))]
           [:div.pl-2.relative.flex.flex-col.text-center.justify-center.text-neutral-content
+           (cond-> {}
+             (and actions (not (:actions tempo)))
+             (merge {:on {:click actions}
+                     :class "cursor-pointer"}))
            (if (:actions tempo)
              (form/number-input
               {:on {:input (:actions tempo)}
