@@ -22,4 +22,10 @@ deploy: target/site
 clean:
 	rm -fr target resources/public/js
 
-.PHONY: tailwind clean deploy
+test:
+	LOG_LEVEL=warn clojure -M:dev:test -m kaocha.runner
+
+autotest:
+	LOG_LEVEL=warn clojure -M:dev:test -m kaocha.runner --watch
+
+.PHONY: tailwind clean deploy test autotest
