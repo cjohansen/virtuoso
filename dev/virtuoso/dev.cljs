@@ -3,8 +3,6 @@
             [gadget.inspector :as inspector]
             [virtuoso.ui.main :as virtuoso]))
 
-(inspector/inspect "Application state" virtuoso/store)
-
 (def labels
   {::virtuoso/ui-layer "Page data"
    ::virtuoso/modal-layer "Modal data"})

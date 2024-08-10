@@ -10,7 +10,6 @@
             [virtuoso.ui.db :as db]))
 
 (defonce conn (db/connect))
-(defonce store (atom nil))
 (defonce metronome (metronome/create-metronome))
 (def ^:dynamic *on-render* nil)
 
@@ -103,8 +102,9 @@
 (defn get-roots []
   (seq (js/document.querySelectorAll ".replicant-root")))
 
-(defn ^:after-load main []
-  (swap! store assoc :reloaded-at (.getTime (js/Date.))))
+(defn ^{:after-load true :export true} main []
+  (d/transact conn [{:db/ident :virtuoso/app
+                     :app/reloaded-at (.getTime (js/Date.))}]))
 
 (defn process-event [conn event data]
   (execute-actions conn (actions/interpolate-event-data (:replicant/js-event event) data)))
@@ -113,7 +113,6 @@
   (replicant/set-dispatch! #(process-event conn %1 %2))
   (let [roots (get-roots)]
     (boot-roots conn roots)
-    (add-watch store ::render (fn [_ _ _ _] (render @conn roots)))
     (add-watch conn ::render (fn [_ _ _ db] (render db roots))))
   (js/document.body.addEventListener
    "keydown"
@@ -123,4 +122,5 @@
          (.preventDefault e)
          (.stopPropagation e)
          (execute-actions conn actions)))))
-  (swap! store assoc :booted-at (.getTime (js/Date.))))
+  (d/transact conn [{:db/ident :virtuoso/app
+                     :app/booted-at (.getTime (js/Date.))}]))
