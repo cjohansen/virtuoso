@@ -19,6 +19,9 @@ target/site: target/public/js/compiled/app.js
 deploy: target/site
 	./deploy.sh
 
+launch:
+	bin/launchpad --emacs dev
+
 clean:
 	rm -fr target resources/public/js
 
