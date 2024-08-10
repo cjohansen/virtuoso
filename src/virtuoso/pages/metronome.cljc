@@ -4,8 +4,7 @@
             [virtuoso.elements.layout :as layout]
             [virtuoso.elements.modal :as modal]
             [virtuoso.elements.typography :as t]
-            [virtuoso.metronome :as metronome]
-            [virtuoso.ui.actions :as actions]))
+            [virtuoso.metronome :as metronome]))
 
 (defn render-page [_ctx _page]
   (layout/layout
@@ -88,7 +87,7 @@
       "ArrowRight" "n"
       "ArrowLeft" "p"})))
 
-(defmethod actions/get-keypress-actions ::tool [db data e]
+(defn get-keypress-actions [db data]
   (-> (get-activity db)
       get-button-actions
       (get (:key data))))

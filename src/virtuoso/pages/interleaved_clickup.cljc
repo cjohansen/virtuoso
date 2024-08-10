@@ -5,8 +5,7 @@
             [virtuoso.elements.form :as form]
             [virtuoso.elements.layout :as layout]
             [virtuoso.elements.typography :as t]
-            [virtuoso.interleaved-clickup :as icu]
-            [virtuoso.ui.actions :as actions]))
+            [virtuoso.interleaved-clickup :as icu]))
 
 (defn render-page [_ctx _page]
   (layout/layout
@@ -118,7 +117,7 @@
 (defn get-activity [db]
   (:view/tool (d/entity db :virtuoso/current-view)))
 
-(defmethod actions/get-keypress-actions ::tool [db data e]
+(defn get-keypress-actions [db data]
   (let [activity (get-activity db)]
     (when (started? activity)
       (case (:key data)

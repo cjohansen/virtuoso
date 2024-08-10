@@ -1,12 +1,5 @@
 (ns virtuoso.ui.actions
-  (:require [clojure.walk :as walk]
-            [datascript.core :as d]))
-
-(defmulti get-keypress-actions
-  (fn [db _e]
-    (:action/keypress-handler (d/entity db :virtuoso/current-view))))
-
-(defmethod get-keypress-actions :default [_db _e])
+  (:require [clojure.walk :as walk]))
 
 (defmulti execute-side-effect! (fn [_conn {:keys [kind]}] kind))
 

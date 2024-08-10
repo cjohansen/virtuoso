@@ -17,13 +17,15 @@
   {"interleaved-clickup"
    {:feature/prepare icu-page/prepare-ui-data
     :feature/render page/page
-    :feature/get-boot-actions icu-page/get-boot-actions}
+    :feature/get-boot-actions icu-page/get-boot-actions
+    :feature/get-keypress-actions icu-page/get-keypress-actions}
 
    "metronome"
    {:feature/prepare metronome-page/prepare-ui-data
     :feature/prepare-modal metronome-page/prepare-modal-data
     :feature/render page/page
-    :feature/get-boot-actions metronome-page/get-boot-actions}})
+    :feature/get-boot-actions metronome-page/get-boot-actions
+    :feature/get-keypress-actions metronome-page/get-keypress-actions}})
 
 (defmethod actions/execute-side-effect! ::start-metronome [_ {:keys [args]}]
   (let [[activity] args
@@ -79,8 +81,8 @@
         (prepare-and-render-ui ui-el db ::ui-layer prepare render-page)))))
 
 (defn render [db roots]
-  (doseq [el roots]
-    (prepare-and-render el db (get features (.getAttribute el "data-view")))))
+  (doseq [{:keys [el id]} roots]
+    (prepare-and-render el db (get features id))))
 
 (defn execute-actions [conn actions]
   (some->> actions
@@ -91,16 +93,18 @@
   (.add (.-classList el) class))
 
 (defn boot-roots [conn roots]
-  (doseq [el roots]
+  (doseq [{:keys [el id]} roots]
     (.appendChild el (doto (js/document.createElement "div")
                        (add-class "ui-layer")))
     (.appendChild el (doto (js/document.createElement "div")
                        (add-class "modal-layer")))
-    (when-let [get-boot-actions (get-in features [(.getAttribute el "data-view") :feature/get-boot-actions])]
+    (when-let [get-boot-actions (get-in features [id :feature/get-boot-actions])]
       (execute-actions conn (get-boot-actions @conn)))))
 
 (defn get-roots []
-  (seq (js/document.querySelectorAll ".replicant-root")))
+  (for [el (seq (js/document.querySelectorAll ".replicant-root"))]
+    {:el el
+     :id (.getAttribute el "data-view")}))
 
 (defn ^{:after-load true :export true} main []
   (d/transact conn [{:db/ident :virtuoso/app
@@ -109,18 +113,26 @@
 (defn process-event [conn event data]
   (execute-actions conn (actions/interpolate-event-data (:replicant/js-event event) data)))
 
+(defn get-keypress-actions [roots db data]
+  (loop [xs (seq roots)]
+    (when xs
+      (let [f (get-in features [(:id (first xs)) :feature/get-keypress-actions])]
+        (if (ifn? f)
+          (f db data)
+          (recur (next xs)))))))
+
 (defn boot []
   (replicant/set-dispatch! #(process-event conn %1 %2))
   (let [roots (get-roots)]
     (boot-roots conn roots)
-    (add-watch conn ::render (fn [_ _ _ db] (render db roots))))
-  (js/document.body.addEventListener
-   "keydown"
-   (fn [e]
-     (when (= js/document.body (.-target e))
-       (when-let [actions (actions/get-keypress-actions @conn {:key (.-key e)} e)]
-         (.preventDefault e)
-         (.stopPropagation e)
-         (execute-actions conn actions)))))
+    (add-watch conn ::render (fn [_ _ _ db] (render db roots)))
+    (js/document.body.addEventListener
+     "keydown"
+     (fn [e]
+       (when (= js/document.body (.-target e))
+         (when-let [actions (get-keypress-actions roots @conn {:key (.-key e)})]
+           (.preventDefault e)
+           (.stopPropagation e)
+           (execute-actions conn actions))))))
   (d/transact conn [{:db/ident :virtuoso/app
                      :app/booted-at (.getTime (js/Date.))}]))
