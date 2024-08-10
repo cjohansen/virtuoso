@@ -129,6 +129,31 @@ they're used by. In other words there was a need for some sort registration
 mechanism, and I opted for a multi-method instead of building a home-grown
 solution.
 
+### Working with the code
+
+My setup assumes Emacs. Launch a REPL with launchpad:
+
+```sh
+make launch
+```
+
+Then run `cider-connect-sibling-cljs` in Emacs to add a ClojureScript sibling
+REPL.
+
+The UI is built with [Tailwind](https://tailwindcss.com/) and
+[DaisyUI](https://daisyui.com/). Start the build process with:
+
+```sh
+make tailwind
+```
+
+Now start the Powerpack app by evaluating `(dev/start)` from
+[dev/virtuoso/dev.clj](./dev/virtuoso/dev.clj), and you should be off to the
+races.
+
+- The app runs on [http://localhost:4848/](http://localhost:4848/).
+- Portfolio displays UI elements on [http://localhost:4847/](http://localhost:4847/).
+
 ## Tests
 
 Run tests with
