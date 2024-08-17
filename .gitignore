@@ -10,3 +10,4 @@ dev-resources/public/js
 /tf/.terraform.lock.hcl
 /tf/.terraform/
 /tf/distribution/.zip/
+/deps.local.edn

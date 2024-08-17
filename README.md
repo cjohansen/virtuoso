@@ -131,7 +131,14 @@ solution.
 
 ### Working with the code
 
-My setup assumes Emacs. Launch a REPL with launchpad:
+Copy the sample launchpad config:
+
+```sh
+cp deps.local.sample.edn deps.local.edn
+```
+
+Edit `deps.local.edn` to your heart's content. The default assumes Emacs. Launch
+a REPL with launchpad:
 
 ```sh
 make launch

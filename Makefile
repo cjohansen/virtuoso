@@ -20,7 +20,7 @@ deploy: target/site
 	./deploy.sh
 
 launch:
-	bin/launchpad --emacs dev
+	bin/launchpad
 
 clean:
 	rm -fr target resources/public/js

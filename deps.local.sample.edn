@@ -1,0 +1,2 @@
+{:launchpad/aliases [:dev]
+ :launchpad/options {:emacs true}}
