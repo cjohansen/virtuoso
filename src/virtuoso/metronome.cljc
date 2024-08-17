@@ -51,6 +51,7 @@
 
   - `:music/time-signature` - a tuple of [beats subdivision], e.g. `[4 4]`.
   - `:music/tempo` - the bar tempo, as a number of beats per minute.
+  - `:bar/rhythm` - a list of note durations that make up the bar rhythm
   - `:bar/reps` - optional number of times to repeat the bar.
   - `:click?` - a function that receives a click and decides if it should, well,
                 click.
@@ -63,6 +64,7 @@
   - `:bar/n` - the total bar number, 1 indexed.
   - `:bar/beat` - the beat number within the bar, 1 indexed.
   - `:beat/n` - the total beat number, 1 indexed.
+  - `:rhythm/n` - the current position in the rhythm pattern
 
   Returns a sequence of clicks. In addition to the above keys, it includes:
 
@@ -70,68 +72,73 @@
                           this click.
   - `:metronome/accentuate?` a boolean indicating if the click should be
                              accentuated."
-  [bar {:keys [first-beat first-bar start-time relative-subdivision]}]
+  [bar {:keys [first-beat first-bar start-time]}]
   (let [[beats subdivision] (or (:music/time-signature bar) [4 4])
         accentuate? (or (:accentuate? bar) (constantly false))
         click? (or (:click? bar) (constantly true))
-        ms (/ (* 60 1000 (or relative-subdivision 4)) (or (:music/tempo bar) 120) subdivision)]
-    (apply concat
-           (for [rep (range (or (:bar/reps bar) 1))]
-             (let [rep-offset (* beats rep)]
-               (->> (range beats)
-                    (map (fn [beat]
-                           {:bar/n (+ first-bar rep)
-                            :bar/beat (inc beat)
-                            :beat/n (+ first-beat (* rep beats) beat)}))
-                    (filter click?)
-                    (map (fn [click]
-                           (cond-> (assoc click :metronome/click-at (+ start-time (* ms (+ (dec (:bar/beat click)) rep-offset))))
-                             (accentuate? click) (assoc :metronome/accentuate? true))))))))))
-
-(defn get-bar-duration [bar & [{:keys [relative-time-signature
-                                       relative-subdivision]}]]
-  (let [[bar-beats subdivision] (:music/time-signature bar)
-        relative-subdivision (or relative-subdivision
-                                 (second relative-time-signature)
-                                 subdivision)
-        beats (* bar-beats (or (:bar/reps bar) 1))]
-    {:beats beats
-     ;; The relative subdivision (possibly from a relative time signature)
-     ;; allows the metronome to click through time signature changes without
-     ;; also forcing a tempo change - e.g. one bar of 4/4 (4 beats) and one bar
-     ;; of 6/8 (two beats).
-     :ms (* beats (/ (* 60 1000 relative-subdivision) (:music/tempo bar) subdivision))}))
+        quarter-note-duration (/ (* 60 1000) (or (:music/tempo bar) 120))
+        beat-duration (* quarter-note-duration (/ 4 subdivision))
+        bar-duration (* quarter-note-duration
+                        beats
+                        (/ 4 subdivision)) ;; A beat is always a quarter note
+        duration (* bar-duration (or (:bar/reps bar) 1))
+        rhythm (or (:bar/rhythm bar) [(/ 1 subdivision)])
+        rhythm-pattern (cycle rhythm)
+        rhythm-pattern-len (count rhythm)]
+    (loop [now 0
+           bar-now 0
+           n 0
+           specs rhythm-pattern
+           clicks []]
+      (if (< now duration)
+        (if (< bar-now bar-duration)
+          ;; (/ 1 4) represents a quarter note, so multiply by 4
+          (let [dur (* quarter-note-duration (first specs) 4)
+                bar-n (int (/ now bar-duration))
+                beat-n (int (/ now beat-duration))
+                click {:bar/n (+ first-bar bar-n)
+                       :bar/beat (inc (mod beat-n beats))
+                       :beat/n (+ first-beat beat-n)
+                       :rhythm/n (inc (mod n rhythm-pattern-len))}]
+            (recur
+             (+ now dur)
+             (+ bar-now dur)
+             (inc n)
+             (next specs)
+             (cond-> clicks
+               (click? click)
+               (conj (cond-> click
+                       (accentuate? click) (assoc :metronome/accentuate? true)
+                       :then (assoc :metronome/click-at (+ start-time now)))))))
+          (recur (+ (- now bar-now) bar-duration) 0 n rhythm-pattern clicks))
+        {:duration duration
+         :beats (* beats (or (:bar/reps bar) 1))
+         :clicks clicks}))))
 
 (defn generate-clicks
-  "Generate clicks for the metronome from the sequence of `bars`. Optionally
-  generate clicks against a relative baseline subdivision to maintain a constant
-  pulse across time signature changes. If no `relative-subdivision` is provided,
-  the subdivision of the initial bar will be used to determine click duration."
-  [bars & [{:keys [now first-bar first-beat relative-subdivision]}]]
-  (let [relative-subdivision (or relative-subdivision
-                                 (-> bars first :music/time-signature second)
-                                 4)]
-    (loop [bars (seq bars)
-           res nil
-           bar-n (or first-bar 1)
-           beat-offset (or first-beat 1)
-           start-time (or now 0)]
-      (if (nil? bars)
-        {:clicks res
-         :bar-count (dec bar-n)
-         :beat-count (dec beat-offset)
-         :time start-time
-         :duration (- start-time (or now 0))}
-        (let [bar (update (first bars) :music/time-signature #(or % [4 4]))
-              {:keys [beats ms]} (get-bar-duration bar {:relative-subdivision relative-subdivision})]
-          (recur (next bars)
-                 (concat res (generate-bar-clicks bar {:first-beat beat-offset
-                                                       :start-time start-time
-                                                       :first-bar bar-n
-                                                       :relative-subdivision relative-subdivision}))
-                 (+ bar-n (:bar/reps bar 1))
-                 (+ beat-offset beats)
-                 (+ start-time ms)))))))
+  "Generate clicks for the metronome from the sequence of `bars`."
+  [bars & [{:keys [now first-bar first-beat]}]]
+  (loop [bars (seq bars)
+         res nil
+         bar-n (or first-bar 1)
+         beat-offset (or first-beat 1)
+         start-time (or now 0)]
+    (if (nil? bars)
+      {:clicks res
+       :bar-count (dec bar-n)
+       :beat-count (dec beat-offset)
+       :time start-time
+       :duration (- start-time (or now 0))}
+      (let [bar (update (first bars) :music/time-signature #(or % [4 4]))
+            {:keys [beats duration clicks]}
+            (generate-bar-clicks bar {:first-beat beat-offset
+                                      :start-time start-time
+                                      :first-bar bar-n})]
+        (recur (next bars)
+               (concat res clicks)
+               (+ bar-n (:bar/reps bar 1))
+               (+ beat-offset beats)
+               (+ start-time duration))))))
 
 (defn- set-timeout [f ms]
   #?(:cljs (js/setTimeout f ms)
@@ -244,6 +251,5 @@
      {;; Offset slightly to avoid the very fist click occasionally being cut short
       :now (+ 5 (* 1000 (.-currentTime (:audio-ctx @metronome))))
       :first-bar 1
-      :first-beat 1
-      :relative-subdivision 4})
+      :first-beat 1})
     nil))
