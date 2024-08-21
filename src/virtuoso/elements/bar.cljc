@@ -1,7 +1,8 @@
 (ns virtuoso.elements.bar
   (:require [phosphor.icons :as icons]
             [virtuoso.elements.form :as form]
-            [virtuoso.elements.icon-button :as icon-button]))
+            [virtuoso.elements.icon-button :as icon-button]
+            [virtuoso.elements.musical-notation :as mn]))
 
 (def sizes
   {:medium 2.5
@@ -64,7 +65,7 @@
          [:div {:style {:min-height (icon-size size)}}
           (icon-button button {:size size})]))]))
 
-(defn bar [{:keys [beats subdivision tempo reps dots size buttons actions] :as bar}]
+(defn bar [{:keys [beats rhythm subdivision tempo reps dots size buttons actions] :as bar}]
   (let [size (if (sizes size) size :medium)
         rem-size (sizes size)
         height (str rem-size "rem")]
@@ -84,6 +85,12 @@
        [:div (:val beats)]
        [:div (:val subdivision)]]
       (render-time-signature-buttons [beats subdivision] :right-button {:height height :size size})
+      ;; Rhythm
+      (when rhythm
+        (mn/render (cond-> {:class ["text-4xl" "pl-2" "pr-2" "relative"]}
+                     actions (assoc :on {:click actions})
+                     actions (update :class conj "cursor-pointer"))
+          rhythm))
       ;; Tempo
       (when tempo
         (let [subtle? (= :subtle (:style tempo))]

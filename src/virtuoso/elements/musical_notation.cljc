@@ -104,7 +104,7 @@
     (dot (position (note->hiccup (second note))))
     (position (note->hiccup note))))
 
-(defn render
+(defn ^{:indent 1} render
   ([notes]
    (render nil notes))
   ([attrs notes]
