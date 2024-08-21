@@ -32,7 +32,7 @@
 
 (defn position [note]
   (if (skewed? note)
-    [:span.relative.-bottom-6 note]
+    [:span.relative {:style {:bottom "-0.4em"}} note]
     note))
 
 (defn dot [note]
@@ -109,7 +109,7 @@
    (render nil notes))
   ([attrs notes]
    (into [:div.flex.gap-4
-          (merge {:class (concat ["font-['Bravura']" "text-6xl"] (:class attrs))}
+          (merge {:class (concat ["font-['Bravura']"] (:class attrs))}
                  (dissoc attrs :class))]
          (for [note notes]
            (cond
@@ -120,4 +120,4 @@
                  :notation/dot (dot (position (note->hiccup (first ns))))))
 
              :else
-             (position (note->hiccup note)))))))
+             [:span (position (note->hiccup note))])))))
