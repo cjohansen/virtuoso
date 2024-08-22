@@ -253,6 +253,7 @@
                                     [{:db/id (:db/id activity)
                                       :music/bars
                                       [{:ordered/idx idx
+                                        :bar/rhythm [(/ 1 4)]
                                         :music/time-signature [4 4]}]}]])
 
                              db
@@ -344,7 +345,11 @@
   (let [n (.indexOf (map :ordered/idx (:music/bars activity))
                     (-> modal :modal/params :idx))
         [template bar] (drop (dec n) (:music/bars activity))]
-    (prepare-bar-edit-modal activity (merge (select-keys template [:music/time-signature]) bar {:db/id (:db/id bar)}))))
+    (->> (merge
+          (select-keys template [:music/time-signature :bar/rhythm])
+          bar
+          {:db/id (:db/id bar)})
+         (prepare-bar-edit-modal activity))))
 
 (defn prepare-existing-bar-edit-modal [activity modal]
   (->> (:music/bars activity)
