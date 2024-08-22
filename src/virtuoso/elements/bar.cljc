@@ -48,6 +48,14 @@
   {:medium "min-w-4"
    :large "min-w-20"})
 
+(def note-size
+  {:medium "text-4xl"
+   :large "text-8xl"})
+
+(def note-padding
+  {:medium "px-2"
+   :large "px-8"})
+
 (defn icon-button [{:keys [icon actions]} {:keys [size]}]
   (when icon
     [:button {:on {:click actions}
@@ -87,7 +95,7 @@
       (render-time-signature-buttons [beats subdivision] :right-button {:height height :size size})
       ;; Rhythm
       (when rhythm
-        (mn/render (cond-> {:class ["text-4xl" "pl-2" "pr-2" "relative"]}
+        (mn/render (cond-> {:class [(note-size size) (note-padding size) "relative"]}
                      actions (assoc :on {:click actions})
                      actions (update :class conj "cursor-pointer"))
           rhythm))

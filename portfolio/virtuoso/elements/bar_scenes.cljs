@@ -103,6 +103,7 @@
                    :left-button {:icon (icons/icon :phosphor.regular/minus-circle)}
                    :right-button {:icon (icons/icon :phosphor.regular/plus-circle)
                                   :actions []}}
+     :rhythm [:note/quarter]
      :reps {:val 1
             :unit "time"
             :button-above {:icon (icons/icon :phosphor.regular/minus-circle)}
@@ -121,6 +122,7 @@
                    :left-button {:icon (icons/icon :phosphor.regular/minus-circle)}
                    :right-button {:icon (icons/icon :phosphor.regular/plus-circle)
                                   :actions []}}
+     :rhythm [:note/quarter]
      :reps {:val 12
             :unit "times"
             :button-above {:icon (icons/icon :phosphor.regular/minus-circle)}

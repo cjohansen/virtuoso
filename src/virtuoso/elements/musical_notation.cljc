@@ -108,7 +108,7 @@
   ([notes]
    (render nil notes))
   ([attrs notes]
-   (into [:div.flex.gap-4
+   (into [:div.flex.gap-4.items-center
           (merge {:class (concat ["font-['Bravura']"] (:class attrs))}
                  (dissoc attrs :class))]
          (for [note notes]
