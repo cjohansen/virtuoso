@@ -7,7 +7,7 @@
   (bar/bar
    {:beats {:val 4}
     :subdivision {:val 4}
-    :rhythm [:note/quarter]
+    :rhythm {:pattern [:note/quarter]}
     :dots [{:highlight? true}
            {}
            {}
@@ -17,7 +17,7 @@
   (bar/bar
    {:beats {:val 4}
     :subdivision {:val 4}
-    :rhythm [[:notation/beam :note/eighth :note/eighth]]
+    :rhythm {:pattern [[:notation/beam :note/eighth :note/eighth]]}
     :reps {:val 2 :unit "times"}
     :dots [{} {} {} {}]}))
 
@@ -25,14 +25,14 @@
   (bar/bar
    {:beats {:val 15}
     :subdivision {:val 8}
-    :rhythm [[:notation/beam :note/sixteenth :note/sixteenth :note/sixteenth :note/sixteenth]]
+    :rhythm {:pattern [[:notation/beam :note/sixteenth :note/sixteenth :note/sixteenth :note/sixteenth]]}
     :dots (repeat 15 {})}))
 
 (defscene with-tempo
   (bar/bar
    {:beats {:val 7}
     :subdivision {:val 8}
-    :rhythm [:note/half [:notation/beam :note/eighth :note/eighth :note/sixteenth :note/sixteenth]]
+    :rhythm {:pattern [:note/half [:notation/beam :note/eighth :note/eighth :note/sixteenth :note/sixteenth]]}
     :actions []
     :tempo {:val 60 :unit "BPM"}
     :dots [{}
@@ -103,7 +103,7 @@
                    :left-button {:icon (icons/icon :phosphor.regular/minus-circle)}
                    :right-button {:icon (icons/icon :phosphor.regular/plus-circle)
                                   :actions []}}
-     :rhythm [:note/quarter]
+     :rhythm {:pattern [:note/quarter]}
      :reps {:val 1
             :unit "time"
             :button-above {:icon (icons/icon :phosphor.regular/minus-circle)}
@@ -122,7 +122,7 @@
                    :left-button {:icon (icons/icon :phosphor.regular/minus-circle)}
                    :right-button {:icon (icons/icon :phosphor.regular/plus-circle)
                                   :actions []}}
-     :rhythm [:note/quarter]
+     :rhythm {:pattern [:note/quarter]}
      :reps {:val 12
             :unit "times"
             :button-above {:icon (icons/icon :phosphor.regular/minus-circle)}

@@ -94,11 +94,12 @@
        [:div (:val subdivision)]]
       (render-time-signature-buttons [beats subdivision] :right-button {:height height :size size})
       ;; Rhythm
-      (when rhythm
-        (mn/render (cond-> {:class [(note-size size) (note-padding size) "relative"]}
-                     actions (assoc :on {:click actions})
-                     actions (update :class conj "cursor-pointer"))
-          rhythm))
+      (when (:pattern rhythm)
+        (let [actions (or actions (:actions rhythm))]
+          (mn/render (cond-> {:class [(note-size size) (note-padding size) "relative"]}
+                       actions (assoc :on {:click actions})
+                       actions (update :class conj "cursor-pointer"))
+            (:pattern rhythm))))
       ;; Tempo
       (when tempo
         (let [subtle? (= :subtle (:style tempo))]
