@@ -8,7 +8,7 @@ musicians practice more efficiently.
 Virtuoso is a static web site with a JavaScript frontend. Specifically, the
 static web pages are built with Clojure using
 [Powerpack](https://github.com/cjohansen/powerpack), and the frontend is written
-in ClojureScript, usin [Datascript](https://github.com/tonsky/datascript) to
+in ClojureScript, using [Datascript](https://github.com/tonsky/datascript) to
 store state, and [Replicant](https://github.com/cjohansen/replicant) to render
 the UI. The frontend is [state-less and
 data-driven](https://vimeo.com/861600197) - every function, except those in
@@ -18,15 +18,15 @@ data-driven](https://vimeo.com/861600197) - every function, except those in
 
 This namespace defines the Powerpack app, and is used to boot the "backend"
 (which only consists of static pages). There really isn't much to this part.
-Pages can boot a dynamic frontend by adding the class `replicant-root` to an
-element, and setting the `data-view` attribute to a string identifier.
+Pages can boot a dynamic frontend by setting the `data-replicant-view` attribute
+on an element to a string identifier.
 
 ### `virtuoso.ui.main`
 
 This namespace contains most of the machinery of the frontend. At the top you
 will find a definition of all the "features" implemented, each using the same
-identifier from the above `data-view` attribute as an id. Each feature defines a
-few functions:
+identifier from the above `data-replicant-view` attribute as an id. Each feature
+defines a few functions:
 
 - `:feature/prepare` - When the app state changes, this function is passed the
   Datascript database to prepare UI data.

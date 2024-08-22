@@ -10,9 +10,9 @@
   (layout/layout
    [:div.flex.flex-col.min-h-screen.justify-between
     (layout/header {:title "Metronome"})
-    [:main.grow.flex.flex-col.gap-4.replicant-root.justify-center
+    [:main.grow.flex.flex-col.gap-4.justify-center
      {:class layout/container-classes
-      :data-view "metronome"}]
+      :data-replicant-view "metronome"}]
     [:footer.my-4 {:class layout/container-classes}
      [:div.px-4.md:px-0.mt-4
       (t/h2 "Help")

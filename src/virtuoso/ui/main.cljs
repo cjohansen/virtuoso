@@ -102,9 +102,9 @@
       (execute-actions conn (get-boot-actions @conn)))))
 
 (defn get-roots []
-  (for [el (seq (js/document.querySelectorAll ".replicant-root"))]
+  (for [el (seq (js/document.querySelectorAll "[data-replicant-view]"))]
     {:el el
-     :id (.getAttribute el "data-view")}))
+     :id (.getAttribute el "data-replicant-view")}))
 
 (defn ^{:after-load true :export true} main []
   (d/transact conn [{:db/ident :virtuoso/app
