@@ -42,7 +42,7 @@ defines a few functions:
   and a map of `{:key}`, and can return actions to perform for key-presses. This
   is how the app implements keyboard shortcuts.
 
-### The render loop
+## The render loop
 
 All the app state lives in a Datascript database. Whenever it changes, a render
 is triggered. Each change causes all mounted features to render (though in
@@ -69,7 +69,7 @@ there is a current modal.
 
 The database and the rendering loop is initiated by `virtuoso.ui.main/boot`.
 
-### Actions
+## Actions
 
 The frontend uses keyword dispatch of actions (e.g. event handlers, key presses,
 boot actions, etc). An action is a tuple like so:
@@ -108,7 +108,7 @@ These can be used like so:
 Which will store an entity with `:music/tempo` set to the value of the input
 field it triggers on.
 
-#### A note on multi-methods
+### A note on multi-methods
 
 The action system uses multi-methods to add new actions and to implement
 side-effects. Normally I'm skeptical of using multi-methods in application code,
@@ -129,7 +129,7 @@ they're used by. In other words there was a need for some sort registration
 mechanism, and I opted for a multi-method instead of building a home-grown
 solution.
 
-### Working with the code
+## Working with the code
 
 Copy the sample launchpad config:
 
