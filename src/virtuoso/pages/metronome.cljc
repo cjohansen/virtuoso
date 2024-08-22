@@ -151,12 +151,72 @@
         :else
         {:actions (conj base-actions [:action/db.add (:db/id bar) :metronome/accentuate-beats beat])}))))
 
+(def whole-note (/ 1 1))
+(def half-note (/ 1 2))
+(def quarter-note (/ 1 4))
+(def eighth-note (/ 1 8))
+(def dotted-eighth-note (* (/ 3 2) (/ 1 8)))
+(def sixteenth-note (/ 1 16))
+(def dotted-sixteenth-note (* (/ 3 2) (/ 1 16)))
+
+(def note-val->sym
+  {whole-note :note/whole
+   half-note :note/half
+   quarter-note :note/quarter
+   eighth-note :note/eighth
+   sixteenth-note :note/sixteenth})
+
+(defn symbolize-note-val [nv]
+  (or (note-val->sym nv)
+      (some->> (* nv (/ 2 3))
+               note-val->sym
+               (conj [:notation/dot]))))
+
+(defn collect-for [nvs duration]
+  (loop [elapsed 0
+         nvs (seq nvs)
+         res []]
+    (if (nil? nvs)
+      [nil (if (= 1 (count res))
+             (first res)
+             res)]
+      (let [nv (first nvs)
+            new-elapsed (+ elapsed nv)]
+        (if (<= new-elapsed duration)
+          (recur new-elapsed (next nvs) (conj res nv))
+          [nvs (if (= 1 (count res))
+                 (first res)
+                 res)])))))
+
+(defn symbolize-rhythm [rhythm]
+  (loop [nvs (seq rhythm)
+         res []]
+    (if nvs
+      (let [nv (first nvs)
+            [next-nvs group] (if (#{eighth-note
+                                    dotted-eighth-note
+                                    sixteenth-note
+                                    dotted-sixteenth-note} nv)
+                               (collect-for nvs quarter-note)
+                               [(next nvs) nv])]
+        (->> (if (coll? group)
+               (->> group
+                    (map symbolize-note-val)
+                    (into [:notation/beam]))
+               (symbolize-note-val group))
+             (conj res)
+             (recur next-nvs)))
+      res)))
+
 (defn prepare-bar [db activity bar paced-bar]
   (let [[beats subdivision] (:music/time-signature bar)]
     (cond-> {:replicant/key [:bar (:db/id bar)]
              :beats {:val beats}
              :subdivision {:val subdivision}
              :dots (prepare-dots activity bar)}
+      (:bar/rhythm bar)
+      (assoc :rhythm {:pattern (symbolize-rhythm (:bar/rhythm bar))})
+
       db
       (assoc :actions (concat (modal/get-open-modal-actions db ::edit-bar-modal {:idx (:ordered/idx bar)})
                               (stop-metronome activity)))
@@ -302,8 +362,10 @@
    :music/tempo (or (:music/tempo settings) 60)
    :metronome/drop-pct (or (:metronome/drop-pct settings) 0)
    :metronome/tempo-step-size (or (:metronome/tempo-step-size settings) 5)
-   :music/bars (or (:music/bars settings) [{:ordered/idx 0
-                                            :music/time-signature [4 4]}])})
+   :music/bars (or (:music/bars settings)
+                   [{:ordered/idx 0
+                     :music/time-signature [4 4]
+                     :bar/rhythm [(/ 1 4)]}])})
 
 (defn get-boot-actions [db]
   [[:action/transact

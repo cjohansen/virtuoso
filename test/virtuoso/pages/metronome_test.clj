@@ -178,12 +178,14 @@
                 {:db/id 666
                  :music/tempo 90
                  :music/bars [{:db/id 1
+                               :bar/rhythm [(/ 1 4)]
                                :music/time-signature [4 4]}]})
                :bars
                helper/simplify-db-actions)
            [{:replicant/key [:bar 1]
              :beats {:val 4}
              :subdivision {:val 4}
+             :rhythm {:pattern [:note/quarter]}
              :dots [{:actions [[:action/db.add {:db/id 666} :activity/paused? true]
                                [:action/stop-metronome]
                                [:action/db.add 1 :metronome/accentuate-beats 1]]}
@@ -719,3 +721,39 @@
                first
                (select-keys [:tempo :reps]))
            {}))))
+
+(deftest symbolize-rhythm-test
+  (testing "Recognizes main note values"
+    (is (= (sut/symbolize-rhythm [1 (/ 1 2) (/ 1 4) (/ 1 8)])
+           [:note/whole
+            :note/half
+            :note/quarter
+            :note/eighth])))
+
+  (testing "Dots notes"
+    (is (= (sut/symbolize-rhythm (map #(* (/ 3 2) %) [1 (/ 1 2) (/ 1 4) (/ 1 8) (/ 1 16)]))
+           [[:notation/dot :note/whole]
+            [:notation/dot :note/half]
+            [:notation/dot :note/quarter]
+            [:notation/dot :note/eighth]
+            [:notation/dot :note/sixteenth]])))
+
+  (testing "Beams eighths in pairs"
+    (is (= (sut/symbolize-rhythm [(/ 1 8) (/ 1 8) (/ 1 8) (/ 1 8)])
+           [[:notation/beam :note/eighth :note/eighth]
+            [:notation/beam :note/eighth :note/eighth]])))
+
+  (testing "Beams eighths in pairs, as far as it goes"
+    (is (= (sut/symbolize-rhythm [(/ 1 8) (/ 1 8) (/ 1 8)])
+           [[:notation/beam :note/eighth :note/eighth]
+            :note/eighth])))
+
+  (testing "Beams eighths and sixteenths"
+    (is (= (sut/symbolize-rhythm [(/ 1 8) (/ 1 16) (/ 1 16)])
+           [[:notation/beam :note/eighth :note/sixteenth :note/sixteenth]])))
+
+  (testing "Beams dotted eighth and sixteenth"
+    (is (= (sut/symbolize-rhythm [(* (/ 3 2) (/ 1 8)) (/ 1 16)
+                                  (* (/ 3 2) (/ 1 8)) (/ 1 16)])
+           [[:notation/beam [:notation/dot :note/eighth] :note/sixteenth]
+            [:notation/beam [:notation/dot :note/eighth] :note/sixteenth]]))))
