@@ -67,7 +67,7 @@ rendered just once before being paused. The modal will be rendered with
 `virtuoso.elements.modal/render` by default) for every change for as long as
 there is a current modal.
 
-The database, and the rendering loop is initiated by `virtuoso.ui.main/boot`.
+The database and the rendering loop is initiated by `virtuoso.ui.main/boot`.
 
 ### Actions
 
@@ -110,9 +110,9 @@ field it triggers on.
 
 #### A note on multi-methods
 
-The action system uses multi-methods to add new actions, and to implement
-side-effects. Normally I'm cautious with using multi-methods in application
-code, so allow me to explain this choice.
+The action system uses multi-methods to add new actions and to implement
+side-effects. Normally I'm skeptical of using multi-methods in application code,
+so allow me to explain this choice.
 
 I wanted all the effects to be implemented in `virtuoso.ui.main`, to keep all
 the side-effecting code in one place. I also wanted to be able to work with
@@ -163,7 +163,13 @@ races.
 
 ## Tests
 
-Run tests with
+Since [pages](./src/virtuoso/pages/metronome.cljc) are implemented entirely with
+pure functions in CLJC files, they are trivial to test.
+[Tests](./test/virtuoso/pages/metronome_test.clj) are written with REPL
+ergonomics in mind (e.g. it should always be easy to evaluate the test AND the
+expression being tested separately).
+
+Run all the tests with
 
 ```sh
 make test
