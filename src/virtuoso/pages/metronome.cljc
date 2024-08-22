@@ -157,9 +157,9 @@
              :beats {:val beats}
              :subdivision {:val subdivision}
              :dots (prepare-dots activity bar)}
-      (:music/tempo bar)
-      (assoc :tempo {:val (:music/tempo paced-bar)
-                     :unit "BPM"})
+      db
+      (assoc :actions (concat (modal/get-open-modal-actions db ::edit-bar-modal {:idx (:ordered/idx bar)})
+                              (stop-metronome activity)))
 
       (< 1 (or (:metronome/reps bar) 1))
       (assoc :reps {:val (:metronome/reps bar)
@@ -172,9 +172,9 @@
                         :actions (conj (stop-metronome activity)
                                        [:action/transact [[:db/retractEntity (:db/id bar)]]])}])
 
-      db
-      (assoc :actions (concat (modal/get-open-modal-actions db ::edit-bar-modal {:idx (:ordered/idx bar)})
-                              (stop-metronome activity))))))
+      (:music/tempo bar)
+      (assoc :tempo {:val (:music/tempo paced-bar)
+                     :unit "BPM"}))))
 
 (defn prepare-bars [db activity]
   (let [paced-bars (metronome/set-tempo (:music/tempo activity) (map #(into {} %) (:music/bars activity)))]
