@@ -13,8 +13,11 @@ tailwind: resources/fontawesome-icons node_modules
 target/public/js/compiled/app.js: resources/fontawesome-icons
 	clojure -M:build -m figwheel.main -bo prod
 
-target/site: target/public/js/compiled/app.js
-	clojure -X:build
+target/public/js/compiled/app-portfolio.js: resources/fontawesome-icons
+	clojure -M:dev:build -m figwheel.main -bo portfolio-prod
+
+target/site: target/public/js/compiled/app.js target/public/js/compiled/app-portfolio.js
+	clojure -X:dev:build
 
 deploy: target/site
 	./deploy.sh
