@@ -129,6 +129,23 @@ they're used by. In other words there was a need for some sort registration
 mechanism, and I opted for a multi-method instead of building a home-grown
 solution.
 
+## Rendering and "components"
+
+All the rendering code is completely generic and oriented towards the user
+interface as its domain. There are no components, because the rendering code
+literally does nothing but convert UI data to hiccup. I call them
+[elements](./src/virtuoso/elements), but really they're just regular pure
+functions.
+
+Some elements can seem to be tangled with the app's domain, but that is not the
+case. Yes, there is a [bar element](./src/virtuoso/elementsbar.cljc), but that
+is simply because a bar of music looks like nothing else -- it looks like a bar
+of music. There is no domain specifics inside this function. For instance, the
+dots below the bar is not assumed to be related to the bar's time signature.
+Instead, both of these visual elements are described individually. It is up to
+the user to decide how these should be related. This keeps domain logic out of
+the rendering logic, and it makes the visual components more widely reusable.
+
 ## Working with the code
 
 Copy the sample launchpad config:
