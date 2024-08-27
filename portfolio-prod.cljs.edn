@@ -1,0 +1,8 @@
+{:main virtuoso.scenes
+ :optimizations :advanced
+ :pretty-print true
+ :source-map "target/public/js/compiled/app-portfolio.js.map"
+ :asset-path "/js/compiled/out"
+ :output-to "target/public/js/compiled/app-portfolio.js"
+ :output-dir "target/public/js/compiled/out"
+ :infer-externs true}
