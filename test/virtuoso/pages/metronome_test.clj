@@ -415,10 +415,12 @@
                                :ordered/idx 0
                                :music/time-signature [4 4]}
                               {:db/id 9
+                               :bar/rhythm [1/4]
                                :ordered/idx 1}]}
                 {:modal/kind ::sut/edit-new-bar-modal
                  :modal/params {:idx 1}})
-               helper/simplify-db-actions)
+               helper/simplify-db-actions
+               (update :sections #(take 1 %)))
            {:title "Configure bar"
             :classes ["max-w-64"]
             :sections
@@ -668,7 +670,8 @@
                                :ordered/idx 1}]}
                 {:modal/kind ::sut/edit-bar-modal
                  :modal/params {:idx 0}})
-               helper/simplify-db-actions)
+               helper/simplify-db-actions
+               (update :sections #(take 1 %)))
            {:title "Configure bar"
             :classes ["max-w-64"]
             :sections
@@ -722,7 +725,40 @@
                :bars
                first
                (select-keys [:tempo :reps]))
-           {}))))
+           {})))
+
+  (testing "Prepares rhythm selection menu"
+    (is (= (-> (sut/prepare-existing-bar-edit-modal
+                {:db/id 567
+                 :music/tempo 60
+                 :music/bars [{:db/id 9
+                               :ordered/idx 0
+                               :bar/rhythm [(/ 1 4)]
+                               :music/time-signature [4 4]}]}
+                {:modal/kind ::sut/edit-bar-modal
+                 :modal/params {:idx 0}})
+               helper/simplify-db-actions
+               :sections
+               second)
+           {:kind :element.kind/musical-notation-selection
+            :items [{:notation [:note/quarter]
+                     :active? true}
+                    {:notation [[:notation/beam :note/eighth :note/eighth]]
+                     :actions [[:action/db.add {:db/id 9} :bar/rhythm [(/ 1 8) (/ 1 8)]]]}
+                    {:notation [[:notation/beam [:notation/dot :note/eighth] :note/sixteenth]]
+                     :actions [[:action/db.add {:db/id 9} :bar/rhythm [(* (/ 3 2) (/ 1 8)) (/ 1 16)]]]}
+                    {:notation [[:notation/beam :note/eighth :note/eighth :note/eighth]]
+                     :actions [[:action/db.add {:db/id 9} :bar/rhythm [(* (/ 2 3) (/ 1 8)) (* (/ 2 3) (/ 1 8)) (* (/ 2 3) (/ 1 8))]]]}
+                    {:notation [[:notation/beam :note/sixteenth :note/sixteenth :note/sixteenth :note/sixteenth]]
+                     :actions [[:action/db.add {:db/id 9} :bar/rhythm [(/ 1 16) (/ 1 16) (/ 1 16) (/ 1 16)]]]}
+                    {:notation [[:notation/beam :note/sixteenth :note/sixteenth :note/sixteenth
+                                 :note/sixteenth :note/sixteenth :note/sixteenth]]
+                     :actions [[:action/db.add {:db/id 9} :bar/rhythm [(* (/ 2 3) (/ 1 16))
+                                                                       (* (/ 2 3) (/ 1 16))
+                                                                       (* (/ 2 3) (/ 1 16))
+                                                                       (* (/ 2 3) (/ 1 16))
+                                                                       (* (/ 2 3) (/ 1 16))
+                                                                       (* (/ 2 3) (/ 1 16))]]]}]}))))
 
 (deftest symbolize-rhythm-test
   (testing "Recognizes main note values"
@@ -758,4 +794,8 @@
     (is (= (sut/symbolize-rhythm [(* (/ 3 2) (/ 1 8)) (/ 1 16)
                                   (* (/ 3 2) (/ 1 8)) (/ 1 16)])
            [[:notation/beam [:notation/dot :note/eighth] :note/sixteenth]
-            [:notation/beam [:notation/dot :note/eighth] :note/sixteenth]]))))
+            [:notation/beam [:notation/dot :note/eighth] :note/sixteenth]])))
+
+  (testing "Beams eighth note triplets in triplets"
+    (is (= (sut/symbolize-rhythm [(* (/ 2 3) (/ 1 8)) (* (/ 2 3) (/ 1 8)) (* (/ 2 3) (/ 1 8))])
+           [[:notation/beam :note/eighth :note/eighth :note/eighth]]))))

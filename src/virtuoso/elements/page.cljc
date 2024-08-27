@@ -5,6 +5,7 @@
             [virtuoso.elements.button-panel :as panel]
             [virtuoso.elements.colored-boxes :as colored-boxes]
             [virtuoso.elements.form :as form]
+            [virtuoso.elements.musical-notation-selection :as mns]
             [virtuoso.elements.typography :as t]))
 
 (defn footer [{:keys [heading text button]}]
@@ -25,5 +26,6 @@
        :element.kind/button-panel (panel/button-panel section)
        :element.kind/colored-boxes (colored-boxes/colored-boxes section)
        :element.kind/footer (footer section)
+       :element.kind/musical-notation-selection (mns/musical-notation-selection section)
        :element.kind/round-badge (badge/round-badge section)
        (prn "Unknown section kind" section)))])

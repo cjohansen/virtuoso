@@ -155,8 +155,10 @@
 (def half-note (/ 1 2))
 (def quarter-note (/ 1 4))
 (def eighth-note (/ 1 8))
+(def eighth-note-triplet (* (/ 2 3) (/ 1 8)))
 (def dotted-eighth-note (* (/ 3 2) (/ 1 8)))
 (def sixteenth-note (/ 1 16))
+(def sixteenth-note-triplet (* (/ 2 3) (/ 1 16)))
 (def dotted-sixteenth-note (* (/ 3 2) (/ 1 16)))
 
 (def note-val->sym
@@ -164,7 +166,9 @@
    half-note :note/half
    quarter-note :note/quarter
    eighth-note :note/eighth
-   sixteenth-note :note/sixteenth})
+   eighth-note-triplet :note/eighth
+   sixteenth-note :note/sixteenth
+   sixteenth-note-triplet :note/sixteenth})
 
 (defn symbolize-note-val [nv]
   (or (note-val->sym nv)
@@ -195,8 +199,10 @@
       (let [nv (first nvs)
             [next-nvs group] (if (#{eighth-note
                                     dotted-eighth-note
+                                    eighth-note-triplet
                                     sixteenth-note
-                                    dotted-sixteenth-note} nv)
+                                    dotted-sixteenth-note
+                                    sixteenth-note-triplet} nv)
                                (collect-for nvs quarter-note)
                                [(next nvs) nv])]
         (->> (if (coll? group)
@@ -310,6 +316,21 @@
                             [[:action/db.add bar :music/tempo :event/target-value-num]])}
     (not (:music/tempo bar)) (assoc :subtle? true)))
 
+(def subdivision-rhythms
+  {4 [[quarter-note]
+      [eighth-note eighth-note]
+      [dotted-eighth-note sixteenth-note]
+      (repeat 3 eighth-note-triplet)
+      (repeat 4 sixteenth-note)
+      (repeat 6 sixteenth-note-triplet)]
+   8 [[quarter-note]
+      [eighth-note]
+      [sixteenth-note sixteenth-note]
+      (repeat 3 sixteenth-note-triplet)]
+   :default [[quarter-note]
+             [eighth-note]
+             [sixteenth-note]]})
+
 (defn prepare-bar-edit-modal [activity bar]
   (let [[beats subdivision] (:music/time-signature bar)
         multi-bar? (< 1 (count (:music/bars activity)))]
@@ -339,7 +360,14 @@
                  :dots (prepare-dots activity bar)
                  :size :large}
           multi-bar? (assoc :reps (prepare-reps-edit bar))
-          multi-bar? (assoc :tempo (prepare-tempo-edit activity bar)))]}]}))
+          multi-bar? (assoc :tempo (prepare-tempo-edit activity bar)))]}
+      {:kind :element.kind/musical-notation-selection
+       :items (for [rhythm (or (subdivision-rhythms subdivision)
+                               (subdivision-rhythms :default))]
+                (let [active? (= rhythm (:bar/rhythm bar))]
+                  (cond-> {:notation (symbolize-rhythm rhythm)}
+                    active? (assoc :active? true)
+                    (not active?) (assoc :actions [[:action/db.add bar :bar/rhythm rhythm]]))))}]}))
 
 (defn prepare-new-bar-modal [activity modal]
   (let [n (.indexOf (map :ordered/idx (:music/bars activity))
