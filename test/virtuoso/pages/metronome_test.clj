@@ -386,6 +386,7 @@
                        [:action/transact
                         [{:db/id 666
                           :music/bars [{:ordered/idx 1
+                                        :bar/rhythm [1/4]
                                         :music/time-signature [4 4]}]}]]]}])))
 
   (testing "Deleting bars can leave holes - make sure new bars have idx at the end"
@@ -402,6 +403,7 @@
            [[:action/transact
              [{:db/id 666
                :music/bars [{:ordered/idx 3
+                             :bar/rhythm [1/4]
                              :music/time-signature [4 4]}]}]]]))))
 
 (deftest prepare-modal-data-test
