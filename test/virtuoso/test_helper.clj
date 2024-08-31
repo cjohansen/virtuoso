@@ -65,4 +65,4 @@
             (#{:action/db.add :action/db.retract} (first x))
             (map? (second x)))
        (update-in [1] #(select-keys % [:db/id]))))
-   data))
+   (e->map data)))
