@@ -152,15 +152,20 @@
 
 (defn schedule-ticks [metronome bars opt]
   (let [{:keys [accent tick]} @metronome
-        {:keys [clicks bar-count beat-count time duration]} (generate-clicks bars opt)]
-    (doseq [{:metronome/keys [click-at accentuate?]} clicks]
+        {:keys [clicks bar-count beat-count time duration]} (generate-clicks bars opt)
+        now (* 1000 (.-currentTime (:audio-ctx @metronome)))
+        callbacks (transient [])]
+    (doseq [{:metronome/keys [click-at accentuate?] :as click} clicks]
+      (when-let [on-click (:on-click opt)]
+        (conj! callbacks (set-timeout #(on-click click) (- click-at now))))
       (let [{:keys [gain]} (if accentuate? accent tick)
             click-at (/ click-at 1000)]
         (.cancelScheduledValues (.-gain gain) click-at)
         (.setValueAtTime (.-gain gain) 0 click-at)
         (.linearRampToValueAtTime (.-gain gain) 1 (+ click-at 0.001))
         (.linearRampToValueAtTime (.-gain gain) 0 (+ click-at 0.001 0.01))))
-    (swap! metronome assoc :tick-schedule
+    (swap! metronome assoc
+           :tick-schedule
            (set-timeout
             (fn []
               (when (:running? @metronome)
@@ -168,7 +173,9 @@
                                  :first-bar bar-count
                                  :first-beat beat-count})
                      (schedule-ticks metronome bars))))
-            (* 0.9 duration)))))
+            (* 0.9 duration))
+
+           :callbacks (persistent! callbacks))))
 
 (defn set-tempo [tempo bars]
   (let [start-tempo (or (:music/tempo (first bars)) tempo)
@@ -219,18 +226,21 @@
         click? (assoc :click? click?)))))
 
 (defn stop [metronome]
-  (when (:running? @metronome)
-    (let [{:keys [tick accent count-in audio-ctx]} @metronome]
-      (unmount audio-ctx tick)
-      (when-not (= tick accent)
-        (unmount audio-ctx accent))
-      (unmount audio-ctx count-in))
-    (when-let [t (:tick-schedule @metronome)]
-      (clear-timeout t))
-    (swap! metronome dissoc :running? :tick :accent :count-in :tick-schedule))
+  (let [{:keys [running? callbacks]} @metronome]
+    (when running?
+      (let [{:keys [tick accent count-in audio-ctx]} @metronome]
+        (unmount audio-ctx tick)
+        (when-not (= tick accent)
+          (unmount audio-ctx accent))
+        (unmount audio-ctx count-in))
+      (when-let [t (:tick-schedule @metronome)]
+        (clear-timeout t))
+      (swap! metronome dissoc :running? :tick :accent :count-in :tick-schedule))
+    (doseq [id callbacks]
+      (clear-timeout id)))
   nil)
 
-(defn start [metronome bars]
+(defn start [metronome bars & [{:keys [on-click]}]]
   (stop metronome)
   (let [{:keys [tick-frequency accent-frequency count-in-frequency audio-ctx]} @metronome
         tick (create-sine-wave audio-ctx (or tick-frequency 1000))]
@@ -251,5 +261,6 @@
      {;; Offset slightly to avoid the very fist click occasionally being cut short
       :now (+ 5 (* 1000 (.-currentTime (:audio-ctx @metronome))))
       :first-bar 1
-      :first-beat 1})
+      :first-beat 1
+      :on-click on-click})
     nil))
