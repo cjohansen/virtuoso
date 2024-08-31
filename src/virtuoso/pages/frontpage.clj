@@ -17,8 +17,8 @@
       "Tools for musicians to practice more efficiently."]
      (layout/box {:href "/interleaved-clickup/"}
        (box-title :phosphor.regular/speedometer "Interleaved Clicking Up")
-       [:p.opacity-80 "Solidify and bring a piece of music up to speed by leveraging random
-    practice while clicking up with the metronome."])
+       [:p.opacity-80 "Solidify a piece of music and bring it up to speed using
+       random practice while clicking up with the metronome."])
      (layout/box {:href "/metronome/"
                   :class ["mt-4"]}
        (box-title :phosphor.regular/metronome "Metronome")
