@@ -4,6 +4,12 @@
             [virtuoso.ui.actions :as actions]
             [virtuoso.ui.db :as db]))
 
+(defmethod actions/execute-side-effect! ::db/transact [conn {:keys [args]}]
+  (try
+    (d/transact conn args)
+    (catch Exception e
+      (throw (ex-info "Failed to transact data" {:tx-data args} e)))))
+
 (defn ^{:style/indent 1} execute-actions [conn actions]
   (some->> actions
            (actions/perform-actions @conn)
