@@ -268,11 +268,38 @@
                              db
                              (into (stop-metronome activity))))}]}))
 
+(defn prepare-form [activity]
+  {:kind :element.kind/boxed-form
+   :boxes
+   (let [stop-actions (stop-metronome activity)]
+     [{:title "Settings"
+       :fields
+       [{:controls
+         [{:label "Drop % of beats"
+           :inputs
+           [{:input/kind :input.kind/number
+             :on
+             {:input
+              (cond-> [[:action/db.add activity :metronome/drop-pct :event/target-value-num]]
+                stop-actions (into stop-actions))}
+             :value (:metronome/drop-pct activity)}]}
+          {:label "Skip interval"
+           :inputs
+           [{:input/kind :input.kind/number
+             :on
+             {:input
+              [[:action/db.add
+                activity
+                :metronome/tempo-step-size
+                :event/target-value-num]]}
+             :value (get-step-size activity)}]}]}]}])})
+
 (defn prepare-metronome [db activity]
   {:sections
    [(prepare-badge activity)
     (prepare-bars db activity)
-    (prepare-button-panel activity)]})
+    (prepare-button-panel activity)
+    (prepare-form activity)]})
 
 (defn prepare-ui-data [db]
   (prepare-metronome db (get-activity db)))

@@ -1,5 +1,6 @@
 (ns virtuoso.pages.metronome-test
   (:require [clojure.test :refer [deftest is testing]]
+            [datascript.core :as d]
             [virtuoso.pages.metronome :as sut]
             [virtuoso.test-helper :as helper]))
 
@@ -420,6 +421,52 @@
                :music/bars [{:ordered/idx 3
                              :bar/rhythm [1/4]
                              :music/time-signature [4 4]}]}]]]))))
+
+(deftest prepare-form-test
+  (testing "Defaults drop percent and step size"
+    (is (= (->> (helper/with-conn [conn]
+                  (helper/execute-actions conn (sut/get-boot-actions (d/db conn)))
+                  (sut/prepare-ui-data (d/db conn)))
+                :sections
+                last
+                helper/simplify-db-actions)
+           {:kind :element.kind/boxed-form
+            :boxes [{:title "Settings"
+                     :fields [{:controls
+                               [{:label "Drop % of beats"
+                                 :inputs [{:input/kind :input.kind/number
+                                           :on
+                                           {:input
+                                            [[:action/db.add
+                                              {:db/id 2}
+                                              :metronome/drop-pct
+                                              :event/target-value-num]]}
+                                           :value 0}]}
+                                {:label "Skip interval"
+                                 :inputs [{:input/kind :input.kind/number
+                                           :on
+                                           {:input
+                                            [[:action/db.add
+                                              {:db/id 2}
+                                              :metronome/tempo-step-size
+                                              :event/target-value-num]]}
+                                           :value 5}]}]}]}]})))
+
+  (testing "Changing the drop % stops running metronome"
+    (is (= (->> (sut/prepare-form {:db/id 4})
+                :boxes
+                first
+                :fields
+                first
+                :controls
+                first
+                :inputs
+                first
+                :on
+                :input)
+           [[:action/db.add {:db/id 4} :metronome/drop-pct :event/target-value-num]
+            [:action/db.add {:db/id 4} :activity/paused? true]
+            [:action/stop-metronome]]))))
 
 (deftest prepare-modal-data-test
   (testing "Prepares for editing new bar in modal"
