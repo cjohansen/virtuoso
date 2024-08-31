@@ -48,14 +48,13 @@
 
   (testing "Defaults to skip-lowering by 5 bpm"
     (is (= (->> (sut/prepare-button-panel
-                 {:music/tempo 60
+                 {:activity/paused? true
+                  :music/tempo 60
                   :music/bars [{}]})
                 :buttons
                 first
                 :actions)
-           [[:action/db.add {:music/tempo 60, :music/bars [{}]} :music/tempo 55]
-            [:action/start-metronome {:music/bars [{}]
-                                      :music/tempo 55}]])))
+           [[:action/db.add {:activity/paused? true, :music/tempo 60, :music/bars [{}]} :music/tempo 55]])))
 
   (testing "Lowering by 5 bpm does not start paused metronome"
     (is (= (->> (sut/prepare-button-panel
@@ -87,7 +86,12 @@
                        :music/tempo 52]
                       [:action/start-metronome {:music/bars [{}]
                                                 :metronome/tempo-step-size 8
-                                                :music/tempo 52}]]})))
+                                                :music/tempo 52}
+                       {:on-click
+                        [[:action/transact
+                          [{:db/id nil
+                            :metronome/current-bar [:metronome/click :bar/n]
+                            :metronome/current-beat [:metronome/click :bar/beat]}]]]}]]})))
 
   (testing "Lowers tempo by a single bpm"
     (is (= (->> (sut/prepare-button-panel
@@ -95,10 +99,9 @@
                   :music/bars [{}]})
                 :buttons
                 second
-                :actions)
-           [[:action/db.add {:music/tempo 120, :music/bars [{}]} :music/tempo 119]
-            [:action/start-metronome {:music/bars [{}]
-                                      :music/tempo 119}]])))
+                :actions
+                first)
+           [:action/db.add {:music/tempo 120, :music/bars [{}]} :music/tempo 119])))
 
   (testing "Bumps tempo by a single bpm"
     (is (= (->> (sut/prepare-button-panel
@@ -107,10 +110,9 @@
                 :buttons
                 (drop 3)
                 first
-                :actions)
-           [[:action/db.add {:music/tempo 120, :music/bars [{}]} :music/tempo 121]
-            [:action/start-metronome {:music/bars [{}]
-                                      :music/tempo 121}]])))
+                :actions
+                first)
+           [:action/db.add {:music/tempo 120, :music/bars [{}]} :music/tempo 121])))
 
   (testing "Defaults to skip increasing by 5 bpm"
     (is (= (->> (sut/prepare-button-panel
@@ -118,10 +120,9 @@
                   :music/bars [{}]})
                 :buttons
                 last
-                :actions)
-           [[:action/db.add {:music/tempo 60, :music/bars [{}]} :music/tempo 65]
-            [:action/start-metronome {:music/bars [{}]
-                                      :music/tempo 65}]])))
+                :actions
+                first)
+           [:action/db.add {:music/tempo 60, :music/bars [{}]} :music/tempo 65])))
 
   (testing "Skips up by preferred step size"
     (is (= (->> (sut/prepare-button-panel
@@ -141,23 +142,36 @@
                        :music/tempo 68]
                       [:action/start-metronome {:music/tempo 68
                                                 :metronome/tempo-step-size 8
-                                                :music/bars [{}]}]]})))
+                                                :music/bars [{}]}
+                       {:on-click
+                        [[:action/transact
+                          [{:db/id nil
+                            :metronome/current-bar [:metronome/click :bar/n]
+                            :metronome/current-beat [:metronome/click :bar/beat]}]]]}]]})))
 
   (testing "Play button starts metronome"
     (is (= (->> (sut/prepare-button-panel
-                 {:music/tempo 95
+                 {:db/id 7
+                  :music/tempo 95
                   :activity/paused? true
                   :music/bars [{}]})
                 :buttons
                 (drop 2)
                 first
                 :actions)
-           [[:action/db.retract {:music/tempo 95
+           [[:action/db.retract {:db/id 7
+                                 :music/tempo 95
                                  :activity/paused? true
                                  :music/bars [{}]} :activity/paused?]
-            [:action/start-metronome {:music/tempo 95
+            [:action/start-metronome {:db/id 7
+                                      :music/tempo 95
                                       :activity/paused? true
-                                      :music/bars [{}]}]])))
+                                      :music/bars [{}]}
+             {:on-click
+              [[:action/transact
+                [{:db/id 7
+                  :metronome/current-bar [:metronome/click :bar/n]
+                  :metronome/current-beat [:metronome/click :bar/beat]}]]]}]])))
 
   (testing "Pause button stops metronome"
     (is (= (->> (sut/prepare-button-panel
