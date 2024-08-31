@@ -10,6 +10,10 @@
     (catch Exception e
       (throw (ex-info "Failed to transact data" {:tx-data args} e)))))
 
+(defmethod actions/execute-side-effect! :virtuoso/start-metronome [conn _args]
+  ;; No-op for testing
+  )
+
 (defn ^{:style/indent 1} execute-actions [conn actions]
   (some->> actions
            (actions/perform-actions @conn)

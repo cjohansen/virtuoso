@@ -5,6 +5,14 @@
 
 (defmulti perform-action (fn [_db action _args] action))
 
+(defmethod perform-action :action/start-metronome [_ _ args]
+  (let [[options tempo] args]
+    [{:kind :virtuoso/start-metronome
+      :args [options tempo]}]))
+
+(defmethod perform-action :action/stop-metronome [_ _ _]
+  [{:kind :virtuoso/stop-metronome}])
+
 (defn parse-number [s]
   (when (not-empty s)
     (parse-long s)))

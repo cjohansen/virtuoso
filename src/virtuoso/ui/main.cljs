@@ -27,7 +27,7 @@
     :feature/get-boot-actions metronome-page/get-boot-actions
     :feature/get-keypress-actions metronome-page/get-keypress-actions}})
 
-(defmethod actions/execute-side-effect! ::start-metronome [_ {:keys [args]}]
+(defmethod actions/execute-side-effect! :virtuoso/start-metronome [_ {:keys [args]}]
   (let [[activity] args
         drop-pct (:metronome/drop-pct activity)
         tempo (:music/tempo activity)]
@@ -38,7 +38,7 @@
       tempo (metronome/set-tempo tempo)
       :then (metronome/start metronome))))
 
-(defmethod actions/execute-side-effect! ::stop-metronome [_ _]
+(defmethod actions/execute-side-effect! :virtuoso/stop-metronome [_ _]
   (metronome/stop metronome))
 
 (defmethod actions/execute-side-effect! ::db/transact [conn {:keys [args]}]
@@ -46,14 +46,6 @@
     (d/transact conn args)
     (catch :default e
       (throw (ex-info "Failed to transact data" {:tx-data args} e)))))
-
-(defmethod actions/perform-action :action/start-metronome [_ _ args]
-  (let [[options tempo] args]
-    [{:kind ::start-metronome
-      :args [options tempo]}]))
-
-(defmethod actions/perform-action :action/stop-metronome [_ _ _]
-  [{:kind ::stop-metronome}])
 
 (defn prepare-and-render-ui [el db k prepare render & data]
   (let [page-data (apply prepare db data)]
