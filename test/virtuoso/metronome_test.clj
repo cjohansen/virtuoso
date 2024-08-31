@@ -12,10 +12,10 @@
                  :bar/rhythm [(/ 1 4)]}]
                sut/generate-clicks
                :clicks)
-           [{:bar/n 1 :bar/beat 1 :beat/n 1 :rhythm/n 1 :metronome/click-at 0000}
-            {:bar/n 1 :bar/beat 2 :beat/n 2 :rhythm/n 1 :metronome/click-at 1000}
-            {:bar/n 1 :bar/beat 3 :beat/n 3 :rhythm/n 1 :metronome/click-at 2000}
-            {:bar/n 1 :bar/beat 4 :beat/n 4 :rhythm/n 1 :metronome/click-at 3000}])))
+           [{:bar/idx 1 :bar/n 1 :bar/beat 1 :beat/n 1 :rhythm/n 1 :metronome/click-at 0000}
+            {:bar/idx 1 :bar/n 1 :bar/beat 2 :beat/n 2 :rhythm/n 1 :metronome/click-at 1000}
+            {:bar/idx 1 :bar/n 1 :bar/beat 3 :beat/n 3 :rhythm/n 1 :metronome/click-at 2000}
+            {:bar/idx 1 :bar/n 1 :bar/beat 4 :beat/n 4 :rhythm/n 1 :metronome/click-at 3000}])))
 
   (testing "Generates clicks for 4/4 eight notes @60BPM"
     (is (= (-> [{:music/time-signature [4 4]
@@ -23,14 +23,14 @@
                  :bar/rhythm [(/ 1 8) (/ 1 8)]}]
                sut/generate-clicks
                :clicks)
-           [{:bar/n 1 :bar/beat 1 :beat/n 1 :rhythm/n 1 :metronome/click-at    0}
-            {:bar/n 1 :bar/beat 1 :beat/n 1 :rhythm/n 2 :metronome/click-at  500}
-            {:bar/n 1 :bar/beat 2 :beat/n 2 :rhythm/n 1 :metronome/click-at 1000}
-            {:bar/n 1 :bar/beat 2 :beat/n 2 :rhythm/n 2 :metronome/click-at 1500}
-            {:bar/n 1 :bar/beat 3 :beat/n 3 :rhythm/n 1 :metronome/click-at 2000}
-            {:bar/n 1 :bar/beat 3 :beat/n 3 :rhythm/n 2 :metronome/click-at 2500}
-            {:bar/n 1 :bar/beat 4 :beat/n 4 :rhythm/n 1 :metronome/click-at 3000}
-            {:bar/n 1 :bar/beat 4 :beat/n 4 :rhythm/n 2 :metronome/click-at 3500}])))
+           [{:bar/idx 1 :bar/n 1 :bar/beat 1 :beat/n 1 :rhythm/n 1 :metronome/click-at    0}
+            {:bar/idx 1 :bar/n 1 :bar/beat 1 :beat/n 1 :rhythm/n 2 :metronome/click-at  500}
+            {:bar/idx 1 :bar/n 1 :bar/beat 2 :beat/n 2 :rhythm/n 1 :metronome/click-at 1000}
+            {:bar/idx 1 :bar/n 1 :bar/beat 2 :beat/n 2 :rhythm/n 2 :metronome/click-at 1500}
+            {:bar/idx 1 :bar/n 1 :bar/beat 3 :beat/n 3 :rhythm/n 1 :metronome/click-at 2000}
+            {:bar/idx 1 :bar/n 1 :bar/beat 3 :beat/n 3 :rhythm/n 2 :metronome/click-at 2500}
+            {:bar/idx 1 :bar/n 1 :bar/beat 4 :beat/n 4 :rhythm/n 1 :metronome/click-at 3000}
+            {:bar/idx 1 :bar/n 1 :bar/beat 4 :beat/n 4 :rhythm/n 2 :metronome/click-at 3500}])))
 
   (testing "Generates quarter note clicks in a 9/16 bar"
     (is (= (->> [{:music/time-signature [9 16]
@@ -249,26 +249,26 @@
                   :bar/reps 2
                   :accentuate? (comp #{1} :bar/beat)}]
                 sut/generate-clicks)
-           {:clicks [{:rhythm/n 1, :bar/n 1, :bar/beat 1, :beat/n 1, :metronome/click-at 0, :metronome/accentuate? true}
-                     {:rhythm/n 1, :bar/n 1, :bar/beat 2, :beat/n 2, :metronome/click-at 500}
-                     {:rhythm/n 1, :bar/n 1, :bar/beat 3, :beat/n 3, :metronome/click-at 1000}
-                     {:rhythm/n 1, :bar/n 1, :bar/beat 4, :beat/n 4, :metronome/click-at 1500}
-                     {:rhythm/n 1, :bar/n 2, :bar/beat 1, :beat/n 5, :metronome/click-at 2000, :metronome/accentuate? true}
-                     {:rhythm/n 1, :bar/n 2, :bar/beat 2, :beat/n 6, :metronome/click-at 2500}
-                     {:rhythm/n 1, :bar/n 2, :bar/beat 3, :beat/n 7, :metronome/click-at 3000}
-                     {:rhythm/n 1, :bar/n 2, :bar/beat 4, :beat/n 8, :metronome/click-at 3500}
-                     {:rhythm/n 1, :bar/n 3, :bar/beat 1, :beat/n 9, :metronome/click-at 4000N, :metronome/accentuate? true}
-                     {:rhythm/n 1, :bar/n 3, :bar/beat 2, :beat/n 10, :metronome/click-at 13000/3}
-                     {:rhythm/n 1, :bar/n 3, :bar/beat 3, :beat/n 11, :metronome/click-at 14000/3}
-                     {:rhythm/n 1, :bar/n 3, :bar/beat 4, :beat/n 12, :metronome/click-at 5000N}
-                     {:rhythm/n 1, :bar/n 3, :bar/beat 5, :beat/n 13, :metronome/click-at 16000/3}
-                     {:rhythm/n 1, :bar/n 3, :bar/beat 6, :beat/n 14, :metronome/click-at 17000/3}
-                     {:rhythm/n 1, :bar/n 4, :bar/beat 1, :beat/n 15, :metronome/click-at 6000N, :metronome/accentuate? true}
-                     {:rhythm/n 1, :bar/n 4, :bar/beat 2, :beat/n 16, :metronome/click-at 19000/3}
-                     {:rhythm/n 1, :bar/n 4, :bar/beat 3, :beat/n 17, :metronome/click-at 20000/3}
-                     {:rhythm/n 1, :bar/n 4, :bar/beat 4, :beat/n 18, :metronome/click-at 7000N}
-                     {:rhythm/n 1, :bar/n 4, :bar/beat 5, :beat/n 19, :metronome/click-at 22000/3}
-                     {:rhythm/n 1, :bar/n 4, :bar/beat 6, :beat/n 20, :metronome/click-at 23000/3}]
+           {:clicks [{:rhythm/n 1, :bar/idx 1, :bar/n 1, :bar/beat 1, :beat/n 1, :metronome/click-at 0, :metronome/accentuate? true}
+                     {:rhythm/n 1, :bar/idx 1, :bar/n 1, :bar/beat 2, :beat/n 2, :metronome/click-at 500}
+                     {:rhythm/n 1, :bar/idx 1, :bar/n 1, :bar/beat 3, :beat/n 3, :metronome/click-at 1000}
+                     {:rhythm/n 1, :bar/idx 1, :bar/n 1, :bar/beat 4, :beat/n 4, :metronome/click-at 1500}
+                     {:rhythm/n 1, :bar/idx 1, :bar/n 2, :bar/beat 1, :beat/n 5, :metronome/click-at 2000, :metronome/accentuate? true}
+                     {:rhythm/n 1, :bar/idx 1, :bar/n 2, :bar/beat 2, :beat/n 6, :metronome/click-at 2500}
+                     {:rhythm/n 1, :bar/idx 1, :bar/n 2, :bar/beat 3, :beat/n 7, :metronome/click-at 3000}
+                     {:rhythm/n 1, :bar/idx 1, :bar/n 2, :bar/beat 4, :beat/n 8, :metronome/click-at 3500}
+                     {:rhythm/n 1, :bar/idx 2, :bar/n 3, :bar/beat 1, :beat/n 9, :metronome/click-at 4000N, :metronome/accentuate? true}
+                     {:rhythm/n 1, :bar/idx 2, :bar/n 3, :bar/beat 2, :beat/n 10, :metronome/click-at 13000/3}
+                     {:rhythm/n 1, :bar/idx 2, :bar/n 3, :bar/beat 3, :beat/n 11, :metronome/click-at 14000/3}
+                     {:rhythm/n 1, :bar/idx 2, :bar/n 3, :bar/beat 4, :beat/n 12, :metronome/click-at 5000N}
+                     {:rhythm/n 1, :bar/idx 2, :bar/n 3, :bar/beat 5, :beat/n 13, :metronome/click-at 16000/3}
+                     {:rhythm/n 1, :bar/idx 2, :bar/n 3, :bar/beat 6, :beat/n 14, :metronome/click-at 17000/3}
+                     {:rhythm/n 1, :bar/idx 2, :bar/n 4, :bar/beat 1, :beat/n 15, :metronome/click-at 6000N, :metronome/accentuate? true}
+                     {:rhythm/n 1, :bar/idx 2, :bar/n 4, :bar/beat 2, :beat/n 16, :metronome/click-at 19000/3}
+                     {:rhythm/n 1, :bar/idx 2, :bar/n 4, :bar/beat 3, :beat/n 17, :metronome/click-at 20000/3}
+                     {:rhythm/n 1, :bar/idx 2, :bar/n 4, :bar/beat 4, :beat/n 18, :metronome/click-at 7000N}
+                     {:rhythm/n 1, :bar/idx 2, :bar/n 4, :bar/beat 5, :beat/n 19, :metronome/click-at 22000/3}
+                     {:rhythm/n 1, :bar/idx 2, :bar/n 4, :bar/beat 6, :beat/n 20, :metronome/click-at 23000/3}]
             :bar-count 4
             :beat-count 20
             :time 8000N

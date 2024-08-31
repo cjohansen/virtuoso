@@ -72,7 +72,7 @@
                           this click.
   - `:metronome/accentuate?` a boolean indicating if the click should be
                              accentuated."
-  [bar {:keys [first-beat first-bar start-time]}]
+  [bar {:keys [first-beat first-bar start-time idx]}]
   (let [[beats subdivision] (or (:music/time-signature bar) [4 4])
         accentuate? (or (:accentuate? bar) (constantly false))
         click? (or (:click? bar) (constantly true))
@@ -96,7 +96,8 @@
           (let [dur (* quarter-note-duration (first specs) 4)
                 bar-n (int (/ now bar-duration))
                 beat-n (int (/ now beat-duration))
-                click {:bar/n (+ first-bar bar-n)
+                click {:bar/idx idx
+                       :bar/n (+ first-bar bar-n)
                        :bar/beat (inc (mod beat-n beats))
                        :beat/n (+ first-beat beat-n)
                        :rhythm/n (inc (mod n rhythm-pattern-len))}]
@@ -122,7 +123,8 @@
          res nil
          bar-n (or first-bar 1)
          beat-offset (or first-beat 1)
-         start-time (or now 0)]
+         start-time (or now 0)
+         idx 1]
     (if (nil? bars)
       {:clicks res
        :bar-count (dec bar-n)
@@ -133,12 +135,14 @@
             {:keys [beats duration clicks]}
             (generate-bar-clicks bar {:first-beat beat-offset
                                       :start-time start-time
-                                      :first-bar bar-n})]
+                                      :first-bar bar-n
+                                      :idx idx})]
         (recur (next bars)
                (concat res clicks)
                (+ bar-n (:bar/reps bar 1))
                (+ beat-offset beats)
-               (+ start-time duration))))))
+               (+ start-time duration)
+               (inc idx))))))
 
 (defn- set-timeout [f ms]
   #?(:cljs (js/setTimeout f ms)
@@ -170,8 +174,8 @@
             (fn []
               (when (:running? @metronome)
                 (->> (merge opt {:now time
-                                 :first-bar bar-count
-                                 :first-beat beat-count})
+                                 :first-bar (inc bar-count)
+                                 :first-beat (inc beat-count)})
                      (schedule-ticks metronome bars))))
             (* 0.9 duration))
 
