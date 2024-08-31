@@ -50,7 +50,7 @@
    (update (into {} activity) :music/tempo #(or tempo %))
    {:on-click [[:action/transact
                 [{:db/id (:db/id activity)
-                  :metronome/current-bar [:metronome/click :bar/n]
+                  :metronome/current-bar [:metronome/click :bar/idx]
                   :metronome/current-beat [:metronome/click :bar/beat]}]]]}])
 
 (defn stop-metronome [activity]
@@ -135,11 +135,11 @@
    :label "BPM"
    :theme (if (:activity/paused? activity) :neutral :success)})
 
-(defn prepare-dots [activity bar]
+(defn prepare-dots [activity bar & [{:keys [active?]}]]
   (let [beat-xs (range 1 (inc (first (:music/time-signature bar))))
         click-beat? (set (or (:metronome/click-beats bar) beat-xs))
         base-actions (stop-metronome activity)]
-    (for [beat beat-xs]
+    (for [[n beat] (map-indexed vector beat-xs)]
       (cond
         (not (click-beat? beat))
         {:disabled? true
@@ -154,7 +154,9 @@
                            [:action/transact [{:db/id (:db/id bar) :metronome/click-beats (set (remove #{beat} beat-xs))}]])])}
 
         :else
-        {:actions (conj base-actions [:action/db.add (:db/id bar) :metronome/accentuate-beats beat])}))))
+        (cond-> {:actions (conj base-actions [:action/db.add (:db/id bar) :metronome/accentuate-beats beat])}
+          (and active? (= (:metronome/current-beat activity) (inc n)))
+          (assoc :current? true))))))
 
 (def whole-note (/ 1 1))
 (def half-note (/ 1 2))
@@ -219,12 +221,13 @@
              (recur next-nvs)))
       res)))
 
-(defn prepare-bar [db activity bar paced-bar]
+(defn prepare-bar [db activity bar paced-bar bar-n]
   (let [[beats subdivision] (:music/time-signature bar)]
     (cond-> {:replicant/key [:bar (:db/id bar)]
              :beats {:val beats}
              :subdivision {:val subdivision}
-             :dots (prepare-dots activity bar)}
+             :dots (prepare-dots activity bar {:active? (and (not (:activity/paused? activity))
+                                                             (= (:metronome/current-bar activity) bar-n))})}
       (:bar/rhythm bar)
       (assoc :rhythm {:pattern (symbolize-rhythm (:bar/rhythm bar))})
 
@@ -250,7 +253,7 @@
 (defn prepare-bars [db activity]
   (let [paced-bars (metronome/set-tempo (:music/tempo activity) (map #(into {} %) (:music/bars activity)))]
     {:kind :element.kind/bars
-     :bars (map #(prepare-bar db activity %1 %2) (:music/bars activity) paced-bars)
+     :bars (map #(prepare-bar db activity %1 %2 (inc %3)) (:music/bars activity) paced-bars (range))
      :buttons [{:text "Add bar"
                 :icon (icons/icon :phosphor.regular/music-notes-plus)
                 :icon-size :large

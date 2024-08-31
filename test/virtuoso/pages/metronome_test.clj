@@ -90,7 +90,7 @@
                        {:on-click
                         [[:action/transact
                           [{:db/id nil
-                            :metronome/current-bar [:metronome/click :bar/n]
+                            :metronome/current-bar [:metronome/click :bar/idx]
                             :metronome/current-beat [:metronome/click :bar/beat]}]]]}]]})))
 
   (testing "Lowers tempo by a single bpm"
@@ -146,7 +146,7 @@
                        {:on-click
                         [[:action/transact
                           [{:db/id nil
-                            :metronome/current-bar [:metronome/click :bar/n]
+                            :metronome/current-bar [:metronome/click :bar/idx]
                             :metronome/current-beat [:metronome/click :bar/beat]}]]]}]]})))
 
   (testing "Play button starts metronome"
@@ -170,7 +170,7 @@
              {:on-click
               [[:action/transact
                 [{:db/id 7
-                  :metronome/current-bar [:metronome/click :bar/n]
+                  :metronome/current-bar [:metronome/click :bar/idx]
                   :metronome/current-beat [:metronome/click :bar/beat]}]]]}]])))
 
   (testing "Pause button stops metronome"
@@ -268,6 +268,46 @@
             {:actions [[:action/db.add 3 :metronome/accentuate-beats 3]]}
             {:disabled? true
              :actions [[:action/db.add 3 :metronome/click-beats 4]]}])))
+
+  (testing "Highlights clicking beat"
+    (is (= (-> (sut/prepare-bars
+                nil
+                {:db/id 666
+                 :music/tempo 120
+                 :metronome/current-bar 1
+                 :metronome/current-beat 1
+                 :music/bars [{:db/id 3
+                               :music/time-signature [4 4]
+                               :metronome/click-beats #{1 3}}]})
+               :bars
+               first
+               :dots
+               first
+               helper/simplify-db-actions)
+           {:actions [[:action/db.add {:db/id 666} :activity/paused? true]
+                      [:action/stop-metronome]
+                      [:action/db.add 3 :metronome/accentuate-beats 1]]
+            :current? true})))
+
+  (testing "Does not highlight clicking disabled beat"
+    (is (= (-> (sut/prepare-bars
+                nil
+                {:db/id 666
+                 :music/tempo 120
+                 :metronome/current-bar 1
+                 :metronome/current-beat 1
+                 :music/bars [{:db/id 3
+                               :music/time-signature [4 4]
+                               :metronome/click-beats #{1 3}}]})
+               :bars
+               first
+               :dots
+               second
+               helper/simplify-db-actions)
+           {:disabled? true
+            :actions [[:action/db.add {:db/id 666} :activity/paused? true]
+                      [:action/stop-metronome]
+                      [:action/db.add 3 :metronome/click-beats 2]]})))
 
   (testing "Accentuates some beats"
     (is (= (->> (sut/prepare-bars

@@ -1,5 +1,6 @@
 (ns ^:figwheel-hooks virtuoso.ui.main
-  (:require [datascript.core :as d]
+  (:require [clojure.walk :as walk]
+            [datascript.core :as d]
             [replicant.dom :as replicant]
             [virtuoso.elements.modal :as modal]
             [virtuoso.elements.page :as page]
@@ -27,16 +28,31 @@
     :feature/get-boot-actions metronome-page/get-boot-actions
     :feature/get-keypress-actions metronome-page/get-keypress-actions}})
 
+(defn execute-actions [conn actions]
+  (some->> actions
+           (actions/perform-actions @conn)
+           (actions/execute! conn)))
+
 (defmethod actions/execute-side-effect! :virtuoso/start-metronome [_ {:keys [args]}]
-  (let [[activity] args
+  (let [[activity & [{:keys [on-click]}]] args
         drop-pct (:metronome/drop-pct activity)
         tempo (:music/tempo activity)]
-    (cond->> (:music/bars activity)
-      drop-pct (metronome/set-default :metronome/drop-pct drop-pct)
-      :always metronome/click-beats
-      :always metronome/accentuate-beats
-      tempo (metronome/set-tempo tempo)
-      :then (metronome/start metronome))))
+    (metronome/start
+     metronome
+     (cond->> (:music/bars activity)
+       drop-pct (metronome/set-default :metronome/drop-pct drop-pct)
+       :always metronome/click-beats
+       :always metronome/accentuate-beats
+       tempo (metronome/set-tempo tempo))
+     {:on-click (when on-click
+                  (fn [click]
+                    (execute-actions
+                     conn
+                     (walk/postwalk
+                      #(if (and (vector? %) (= :metronome/click (first %)))
+                         (get click (second %))
+                         %)
+                      on-click))))})))
 
 (defmethod actions/execute-side-effect! :virtuoso/stop-metronome [_ _]
   (metronome/stop metronome))
@@ -75,11 +91,6 @@
 (defn render [db roots]
   (doseq [{:keys [el id]} roots]
     (prepare-and-render el db (get features id))))
-
-(defn execute-actions [conn actions]
-  (some->> actions
-           (actions/perform-actions @conn)
-           (actions/execute! conn)))
 
 (defn add-class [el class]
   (.add (.-classList el) class))
