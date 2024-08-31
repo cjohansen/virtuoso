@@ -370,6 +370,21 @@
                 :actions)
            [[:action/transact [[:db/retractEntity 1]]]])))
 
+  (testing "Rounds tempos on bars"
+    (is (= (->> (sut/prepare-bars
+                 nil
+                 {:db/id 666
+                  :music/tempo 60
+                  :activity/paused? true
+                  :music/bars [{:ordered/idx 2
+                                :music/time-signature [4 4]}
+                               {:ordered/idx 2
+                                :music/tempo 75.83333333333
+                                :music/time-signature [4 4]}]})
+                :bars
+                (map :tempo))
+           [nil {:val 76 :unit "BPM"}])))
+
   (testing "Includes button to add another bar"
     (is (= (->> (sut/prepare-bars
                  nil

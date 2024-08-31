@@ -239,7 +239,7 @@
                                        [:action/transact [[:db/retractEntity (:db/id bar)]]])}])
 
       (:music/tempo bar)
-      (assoc :tempo {:val (:music/tempo paced-bar)
+      (assoc :tempo {:val (Math/round (float (:music/tempo paced-bar)))
                      :unit "BPM"}))))
 
 (defn prepare-bars [db activity]
