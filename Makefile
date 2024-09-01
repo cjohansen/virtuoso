@@ -19,14 +19,14 @@ target/public/js/compiled/app-portfolio.js: resources/fontawesome-icons
 target/site: target/public/js/compiled/app.js target/public/js/compiled/app-portfolio.js
 	clojure -X:dev:build
 
-deploy: target/site
-	./deploy.sh
-
 launch:
 	bin/launchpad
 
 clean:
-	rm -fr target resources/public/js
+	rm -fr target resources/public/js dev-resources/public/js
+
+deploy: clean target/site
+	./deploy.sh
 
 test:
 	LOG_LEVEL=warn clojure -M:dev:test -m kaocha.runner
