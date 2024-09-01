@@ -3,30 +3,30 @@
 [virtuoso.tools](https://virtuoso.tools) is a collection of tools to help
 musicians practice more efficiently.
 
-## Overview
+## Technical overview
 
 Virtuoso is a static web site with a JavaScript frontend. Specifically, the
 static web pages are built with Clojure using
 [Powerpack](https://github.com/cjohansen/powerpack), and the frontend is written
 in ClojureScript, using [Datascript](https://github.com/tonsky/datascript) to
-store state, and [Replicant](https://github.com/cjohansen/replicant) to render
+store state and [Replicant](https://github.com/cjohansen/replicant) to render
 the UI. The frontend is [state-less and
 data-driven](https://vimeo.com/861600197) - every function, except those in
 [`virtuoso.ui.main`](./src/virtuoso/ui/main.cljs), is pure.
 
 ### `virtuoso.core`
 
-This namespace defines the Powerpack app, and is used to boot the "backend"
-(which only consists of static pages). There really isn't much to this part.
-Pages can boot a dynamic frontend by setting the `data-replicant-view` attribute
-on an element to a string identifier.
+This namespace defines the Powerpack app and is used to boot the "backend",
+which only consists of static pages. There really isn't much to this part. Pages
+can boot a dynamic frontend by setting the `data-replicant-view` attribute on an
+element to a string identifier.
 
 ### `virtuoso.ui.main`
 
-This namespace contains most of the machinery of the frontend. At the top you
-will find a definition of all the "features" implemented, each using the same
-identifier from the above `data-replicant-view` attribute as an id. Each feature
-defines a few functions:
+This namespace contains the machinery of the frontend. At the top you will find
+a definition of all the "features" implemented, each using the same identifier
+from the above `data-replicant-view` attribute as an id. Each feature defines a
+few functions:
 
 - `:feature/prepare` - When the app state changes, this function is passed the
   Datascript database to prepare UI data.
@@ -49,7 +49,7 @@ is triggered. Each change causes all mounted features to render (though in
 practice, each page only has a single feature at this point).
 
 Features are rendered in two distinct layers: the app layer, and the modal
-layer. The idea behind this is that there isn't much of a point in rendering the
+layer. The idea behind this is that there isn't much point in rendering the
 underlying page when focus is on a modal.
 
 Every change causes a feature's `:feature/prepare` function to be called with
@@ -136,6 +136,9 @@ interface as its domain. There are no components, because the rendering code
 literally does nothing but convert UI data to hiccup. I call them
 [elements](./src/virtuoso/elements), but really they're just regular pure
 functions.
+
+The element portfolio is available in production on
+[virtuoso.tools/portfolio/](https://virtuoso.tools/portfolio/).
 
 Some elements can seem to be tangled with the app's domain, but that is not the
 case. Yes, there is a [bar element](./src/virtuoso/elementsbar.cljc), but that
