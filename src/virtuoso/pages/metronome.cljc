@@ -142,8 +142,10 @@
     (for [[n beat] (map-indexed vector beat-xs)]
       (cond
         (not (click-beat? beat))
-        {:disabled? true
-         :actions (conj base-actions [:action/db.add (:db/id bar) :metronome/click-beats beat])}
+        (cond-> {:disabled? true
+                 :actions (conj base-actions [:action/db.add (:db/id bar) :metronome/click-beats beat])}
+          (and active? (= (:metronome/current-beat activity) (inc n)))
+          (assoc :current? true))
 
         (contains? (:metronome/accentuate-beats bar) beat)
         {:highlight? true
