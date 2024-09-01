@@ -21,8 +21,8 @@
        "Interleaved clicking up helps you solidify and bring a piece of music up
        to speed by breaking it into chunks and clicking them up in a rotating
        pattern. You start with just a single chunk and click it up. You then add
-       a unit, and will then be asked to play sections of varying lengths every
-       time you increase the speed.")
+       another chunk, and will be asked to play sections of varying lengths
+       every time you increase the speed.")
       (t/p {}
        "This exercise was designed by "
        [:a.link {:href "https://www.mollygebrian.com/"} "Molly Gebrian"] ". She
