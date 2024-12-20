@@ -182,12 +182,14 @@
                 :actions (stop activity)}}
       {:kind :element.kind/footer
        :heading "How to use"
-       :text (str "Play the indicated " (str/lower-case label) " once, then
-       click the + button or either the + or up arrow key on your keyboard to
-       bump the tempo. Repeat until you are at the goal tempo, or you can no
-       longer keep up. Click the skip button or either the n or right arrow key
-       on your keyboard to add a " (str/lower-case label) ", then repeat theq
-       process.")}]}))
+       :text (list (str "Play the indicated " (str/lower-case label) " once,
+       then click the + button or either the ") [:kbd.kbd.kbd-sm "↑"] " or "
+                   [:kbd.kbd.kbd-sm "+"]
+                   (str " key on your keyboard to bump
+       the tempo. Repeat until you are at the goal tempo, or you can no longer
+       keep up. Click the skip button or either ") [:kbd.kbd.kbd-sm "→"] " or "
+                   [:kbd.kbd.kbd-sm "n"] (str " key on your keyboard to
+       add a " (str/lower-case label) ", then repeat theq process."))}]}))
 
 #_(defn prepare-time-signature [activity]
   (let [[numerator denominator] (:music/time-signature activity)]
