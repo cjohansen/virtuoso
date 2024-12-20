@@ -122,12 +122,16 @@
     (when (started? activity)
       (case (:key data)
         "+" (increase-tempo activity)
+        "ArrowUp" (increase-tempo activity)
         "-" (decrease-tempo activity)
+        "ArrowDown" (decrease-tempo activity)
         " " (if (:activity/paused? activity)
               (play activity)
               (pause activity))
         "n" (forward-phrase activity)
+        "ArrowRight" (forward-phrase activity)
         "p" (backward-phrase activity)
+        "ArrowLeft" (backward-phrase activity)
         nil))))
 
 (defn prepare-icu [activity]
@@ -146,11 +150,11 @@
        :buttons (for [button [{:text "Lower BPM"
                                :icon (icons/icon :phosphor.bold/minus)
                                :actions (decrease-tempo activity)
-                               :kbd "-"}
+                               :kbd "↓"}
                               {:text "Previous phrase"
                                :icon (icons/icon :phosphor.fill/skip-back)
                                :actions (backward-phrase activity)
-                               :kbd "p"}
+                               :kbd "←"}
                               (if (:activity/paused? activity)
                                 {:text "Play"
                                  :icon (icons/icon :phosphor.fill/play)
@@ -165,11 +169,11 @@
                               {:text "Next phrase"
                                :icon (icons/icon :phosphor.fill/skip-forward)
                                :actions (forward-phrase activity)
-                               :kbd "n"}
+                               :kbd "→"}
                               {:text "Bump BPM"
                                :icon (icons/icon :phosphor.bold/plus)
                                :actions (increase-tempo activity)
-                               :kbd "+"}]]
+                               :kbd "↑"}]]
                   (cond-> button
                     (nil? (:actions button)) (assoc :disabled? true)))}
       {:kind :element.kind/footer
@@ -179,10 +183,11 @@
       {:kind :element.kind/footer
        :heading "How to use"
        :text (str "Play the indicated " (str/lower-case label) " once, then
-       click the + button or the + key on your keyboard to bump the tempo.
-       Repeat until you are at the goal tempo, or you can no longer keep up.
-       Click the skip button or the n key on your keyboard to add
-       a " (str/lower-case label) ", then repeat the process.")}]}))
+       click the + button or either the + or up arrow key on your keyboard to
+       bump the tempo. Repeat until you are at the goal tempo, or you can no
+       longer keep up. Click the skip button or either the n or right arrow key
+       on your keyboard to add a " (str/lower-case label) ", then repeat theq
+       process.")}]}))
 
 #_(defn prepare-time-signature [activity]
   (let [[numerator denominator] (:music/time-signature activity)]
