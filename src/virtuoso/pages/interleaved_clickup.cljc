@@ -192,7 +192,7 @@
        the tempo. Repeat until you are at the goal tempo, or you can no longer
        keep up. Click the skip button or the " [:kbd.kbd.kbd-sm "→"]
         " key (or " [:kbd.kbd.kbd-sm "n"] ") on your keyboard to
-       add a " (str/lower-case label) ", then repeat theq process.")}]}))
+       add a " (str/lower-case label) ", then repeat the process.")}]}))
 
 #_(defn prepare-time-signature [activity]
   (let [[numerator denominator] (:music/time-signature activity)]
